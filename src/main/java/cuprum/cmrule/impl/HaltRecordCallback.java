@@ -48,7 +48,7 @@ public class HaltRecordCallback implements MachineCallback {
     @Override
     public <CQ extends BaseConnectedQuiver<CQ>> void onHalt(int step, Map<Integer, Quiver<CQ>> quiverHistory) {
         if (this.rulePattern % Setting.PRINT_STEP == 0)
-            System.out.println("HALTS AT TIME " + step + "!");
+            System.out.print("HALTS AT TIME " + step + "!");
         if (this.rulePattern > -1 && step > 4) {
             this.record.add(this.rulePattern);
         }
