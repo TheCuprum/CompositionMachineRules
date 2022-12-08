@@ -1,9 +1,9 @@
 package cuprum.cmrule.tester;
 
+import compositionmachine.machine.CompositionMachine;
 import compositionmachine.machine.ConnectedQuiver;
-import compositionmachine.machine.QuiverInitializer;
-import compositionmachine.machine.internal.CompositionMachine;
-import compositionmachine.machine.predicates.HaltPredicate;
+import compositionmachine.machine.interfaces.HaltPredicate;
+import compositionmachine.machine.interfaces.QuiverInitializer;
 import cuprum.cmrule.Setting;
 import cuprum.cmrule.impl.HaltRecordCallback;
 import cuprum.cmrule.rules.ECARule;
@@ -32,7 +32,7 @@ public class ECARuleTester {
                 System.out.print("Rule: " + ruleName + " -- ");
             }
 
-            haltCallback.setRule(i);
+            // haltCallback.setRule(i);
             ECARule rule = new ECARule(d1, d2, d3, d4);
             // NotXorRule126 rule = new NotXorRule126();
             CompositionMachine<ConnectedQuiver> machine = CompositionMachine.createMachine(qInit, rule, predicate);

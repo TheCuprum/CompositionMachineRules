@@ -1,5 +1,7 @@
 package cuprum.cmrule;
 
+import java.util.ArrayList;
+
 import compositionmachine.machine.predicates.LoopPredicate;
 import cuprum.cmrule.impl.OneEdgeQuiverInitializer;
 import cuprum.cmrule.tester.ECARuleTester;

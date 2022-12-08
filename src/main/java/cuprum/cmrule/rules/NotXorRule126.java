@@ -2,8 +2,8 @@ package cuprum.cmrule.rules;
 
 import compositionmachine.bootstrap.Bootstrap;
 import compositionmachine.bootstrap.Config;
-import compositionmachine.machine.RuleSet;
-import compositionmachine.machine.internal.CompositionMachine;
+import compositionmachine.machine.CompositionMachine;
+import compositionmachine.machine.interfaces.RuleSet;
 
 public class NotXorRule126 extends RuleSet {
     // 01

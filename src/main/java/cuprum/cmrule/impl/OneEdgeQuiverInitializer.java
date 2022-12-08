@@ -2,7 +2,7 @@ package cuprum.cmrule.impl;
 
 import compositionmachine.machine.ConnectedQuiver;
 import compositionmachine.machine.Quiver;
-import compositionmachine.machine.QuiverInitializer;
+import compositionmachine.machine.interfaces.QuiverInitializer;
 
 public class OneEdgeQuiverInitializer implements QuiverInitializer<ConnectedQuiver>{
     @Override

@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import compositionmachine.bootstrap.Config;
-import compositionmachine.machine.BaseConnectedQuiver;
 import compositionmachine.machine.Quiver;
-import compositionmachine.machine.callbacks.MachineCallback;
+import compositionmachine.machine.interfaces.BaseConnectedQuiver;
+import compositionmachine.machine.interfaces.MachineCallback;
 import cuprum.cmrule.Setting;
 
 // not compatible with config.
@@ -20,10 +20,12 @@ public class HaltRecordCallback implements MachineCallback {
 
     }
 
+    @Deprecated
     public void setRule(int pattern) {
         this.rulePattern = pattern;
     }
 
+    @Deprecated
     public ArrayList<Integer> getRecord() {
         return this.record;
     }
@@ -46,13 +48,14 @@ public class HaltRecordCallback implements MachineCallback {
     }
 
     @Override
-    public <CQ extends BaseConnectedQuiver<CQ>> void onHalt(int step, Map<Integer, Quiver<CQ>> quiverHistory) {
+    public <CQ extends BaseConnectedQuiver<CQ>> Object onHalt(int step, Map<Integer, Quiver<CQ>> quiverHistory) {
         if (this.rulePattern % Setting.PRINT_STEP == 0)
             System.out.print("HALTS AT TIME " + step + "!");
         if (this.rulePattern > -1 && step > 4) {
             this.record.add(this.rulePattern);
         }
         this.rulePattern = -1;
+        return null;
         // int suffixLength = 0;
         // int totalSteps = step;
         // while (totalSteps / 10 > 0) {

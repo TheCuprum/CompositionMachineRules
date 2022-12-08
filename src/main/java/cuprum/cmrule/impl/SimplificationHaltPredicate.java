@@ -3,10 +3,10 @@ package cuprum.cmrule.impl;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
-import compositionmachine.machine.BaseConnectedQuiver;
+import compositionmachine.machine.Arrow;
 import compositionmachine.machine.Quiver;
-import compositionmachine.machine.internal.Arrow;
-import compositionmachine.machine.predicates.HaltPredicate;
+import compositionmachine.machine.interfaces.BaseConnectedQuiver;
+import compositionmachine.machine.interfaces.HaltPredicate;
 
 public class SimplificationHaltPredicate implements HaltPredicate {
 

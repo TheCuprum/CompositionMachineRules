@@ -1,6 +1,6 @@
 package cuprum.cmrule.rules;
 
-import compositionmachine.machine.RuleSet;
+import compositionmachine.machine.interfaces.RuleSet;
 
 public class ECARule extends RuleSet {
     protected int delta1RulePattern; // 2bit int
