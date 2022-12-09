@@ -4,6 +4,7 @@ import compositionmachine.bootstrap.Bootstrap;
 import compositionmachine.bootstrap.Config;
 import compositionmachine.machine.CompositionMachine;
 import compositionmachine.machine.interfaces.RuleSet;
+import compositionmachine.machine.predicates.LoopPredicate;
 
 public class NotXorRule126 extends RuleSet {
     // 01
@@ -48,8 +49,9 @@ public class NotXorRule126 extends RuleSet {
         Config config = new Config();
         config.customClassPath = "target/classes/";
         config.initializerName = "compositionmachine.examples.ExampleQuiverInitializer";
-        config.ruleName = "cuprum.cmrule.NotXorRule126";
+        config.ruleName = "cuprum.cmrule.rules.NotXorRule126";
         config.iterationSteps = 24;
+        config.haltPredicateName = "compositionmachine.machine.predicates.NullPredicate";
         config.callbackNames = callbackNames;
         config.dotOutputPath = "data/";
         config.machineName = "not-xor-rule126";

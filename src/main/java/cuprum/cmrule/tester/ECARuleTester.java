@@ -1,7 +1,11 @@
 package cuprum.cmrule.tester;
 
+import java.util.ArrayList;
+
+import compositionmachine.bootstrap.Config;
 import compositionmachine.machine.CompositionMachine;
 import compositionmachine.machine.ConnectedQuiver;
+import compositionmachine.machine.callbacks.SaveDotCallback;
 import compositionmachine.machine.interfaces.HaltPredicate;
 import compositionmachine.machine.interfaces.QuiverInitializer;
 import cuprum.cmrule.Setting;
@@ -20,6 +24,15 @@ public class ECARuleTester {
         int totalRules = 1 << (2 + 4 + 4 + 8);
 
         HaltRecordCallback haltCallback = new HaltRecordCallback();
+        ArrayList<Integer> ruleRecord = new ArrayList<>();
+
+        /*
+         * simplification (d2 & d3):
+         * 2 <-> 4
+         * 3 <-> 5
+         * 10 <-> 12
+         * 11 <-> 7
+         */
 
         for (int i = 0; i < totalRules; i++) {
             int d1 = (i >> 16) & 0x03;
@@ -38,7 +51,10 @@ public class ECARuleTester {
             CompositionMachine<ConnectedQuiver> machine = CompositionMachine.createMachine(qInit, rule, predicate);
             machine.addCallback(haltCallback);
             // machine.addCallback(new PrintBlockCallback());
-            machine.execute(steps);
+            Object[] quitState = machine.execute(steps);
+
+            if (quitState.length > 0)
+                ruleRecord.add(i);
 
             if (i % Setting.PRINT_STEP == 0)
                 System.out.println();
@@ -46,6 +62,25 @@ public class ECARuleTester {
 
         System.out.println("Writing records...");
 
-        Util.writeRuleListToFile(haltCallback.getRecord(), fileName);
+        Util.writeRuleListToFile(ruleRecord, fileName);
+    }
+
+    public static void testOne(int d1, int d2, int d3, int d4, QuiverInitializer<ConnectedQuiver> qInit,
+            HaltPredicate predicate, int steps) {
+        ECARule rule = new ECARule(d1, d2, d3, d4);
+        CompositionMachine<ConnectedQuiver> machine = CompositionMachine.createMachine(qInit, rule, predicate);
+
+        Config placeholderConfig = new Config();
+        placeholderConfig.machineName = "eca_" + d1 + "-" + d2 + "-" + d3 + "-" + d4;
+        placeholderConfig.iterationSteps = steps;
+        Config.complete(placeholderConfig);
+        SaveDotCallback saveDotCallback = new SaveDotCallback();
+        saveDotCallback.initialize(placeholderConfig);
+
+        machine.addCallback(saveDotCallback);
+
+        machine.execute(steps);
+
+        System.out.println("Rule: " + "eca_" + d1 + "-" + d2 + "-" + d3 + "-" + d4 + " Done!");
     }
 }
