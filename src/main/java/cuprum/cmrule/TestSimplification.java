@@ -9,6 +9,6 @@ public class TestSimplification {
         OneEdgeQuiverInitializer qInit = new OneEdgeQuiverInitializer();
         SimplificationHaltPredicate predicate = new SimplificationHaltPredicate();
         
-        ECARuleTester.testAll(qInit, predicate, Setting.SIMPLIFICATION_RECORD_FILE, 5000);
+        ECARuleTester.testAll(qInit, predicate, Setting.SIMPLIFICATION_RECORD_FILE, 1000);
     }
 }

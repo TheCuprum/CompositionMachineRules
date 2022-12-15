@@ -6,12 +6,15 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 
+import compositionmachine.machine.Arrow;
+import compositionmachine.machine.interfaces.BaseConnectedQuiver;
 import compositionmachine.util.FileUtil;
 import cuprum.cmrule.Setting;
 
-public class Util {
-    public static void writeRuleListToFile(ArrayList<Integer> ruleList, String fileName){
+public class TesterUtil {
+    public static void writeRuleListToFile(ArrayList<Integer> ruleList, String fileName) {
         FileUtil.createOrChangeDirectory(Setting.DATA_PATH);
         File recordFile = Path.of(Setting.DATA_PATH, fileName).toFile();
         PrintStream recordWriter = null;
@@ -33,5 +36,25 @@ public class Util {
             if (recordWriter != null)
                 recordWriter.close();
         }
+    }
+
+    public static <CQ extends BaseConnectedQuiver<CQ>> int countArrows(BaseConnectedQuiver<CQ> bcq) {
+        int arrowCount = 0;
+        Iterator<Arrow> arrowIterator = bcq.getArrowIterator();
+        while (arrowIterator.hasNext()) {
+            int state = bcq.getArrowState(arrowIterator.next());
+            arrowCount += state > 0 ? 1 : 0;
+        }
+        return arrowCount;
+    }
+
+    public static <CQ extends BaseConnectedQuiver<CQ>> int countArrowWeights(BaseConnectedQuiver<CQ> bcq) {
+        int arrowCount = 0;
+        Iterator<Arrow> arrowIterator = bcq.getArrowIterator();
+        while (arrowIterator.hasNext()) {
+            int state = bcq.getArrowState(arrowIterator.next());
+            arrowCount += state;
+        }
+        return arrowCount;
     }
 }

@@ -62,7 +62,7 @@ public class ECARuleTester {
 
         System.out.println("Writing records...");
 
-        Util.writeRuleListToFile(ruleRecord, fileName);
+        TesterUtil.writeRuleListToFile(ruleRecord, fileName);
     }
 
     public static void testOne(int d1, int d2, int d3, int d4, QuiverInitializer<ConnectedQuiver> qInit,

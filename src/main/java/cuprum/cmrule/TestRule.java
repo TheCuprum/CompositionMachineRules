@@ -26,7 +26,7 @@ public class TestRule {
         }
 
         OneEdgeQuiverInitializer qInit = new OneEdgeQuiverInitializer();
-        HaltPredicate predicate = new LoopPredicate(10);
+        HaltPredicate predicate = new LoopPredicate(20);
 
         ECARuleTester.testOne(d1, d2, d3, d4, qInit, predicate, 150);
     }

@@ -4,7 +4,6 @@ import compositionmachine.bootstrap.Bootstrap;
 import compositionmachine.bootstrap.Config;
 import compositionmachine.machine.CompositionMachine;
 import compositionmachine.machine.interfaces.RuleSet;
-import compositionmachine.machine.predicates.LoopPredicate;
 
 public class NotXorRule126 extends RuleSet {
     // 01
