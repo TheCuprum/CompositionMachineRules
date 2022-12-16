@@ -24,7 +24,7 @@ public class SimplificationHaltPredicate implements HaltPredicate {
                 BaseConnectedQuiver<CQ> cq = currentQuiver.get(i);
                 int edgeCount = TesterUtil.countArrows(cq);
 
-                if (edgeCount == 1) { // if there is only one edge in this part of connected quiver
+                if (edgeCount <= 1) { // if there is only some edges in this part of connected quiver
                     boolean loopFlag = false;
                     int loopStep = -1;
                     int maxArrowNumber = 0;
@@ -40,7 +40,7 @@ public class SimplificationHaltPredicate implements HaltPredicate {
                         if (arrowCount > maxArrowNumber)
                             maxArrowNumber = arrowCount;
 
-                        if (loopFlag && maxArrowNumber >= scannedQuiver.getArrowStates().size() / 2)
+                        if (loopFlag && maxArrowNumber >= scannedQuiver.getArrowStates().size() * 2 / 3)
                             return true;
 
                         if (step - j >= (step - loopStep) * TEST_LOOPS)

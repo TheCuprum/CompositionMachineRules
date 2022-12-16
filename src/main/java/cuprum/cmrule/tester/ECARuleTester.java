@@ -9,6 +9,7 @@ import compositionmachine.machine.callbacks.SaveDotCallback;
 import compositionmachine.machine.interfaces.HaltPredicate;
 import compositionmachine.machine.interfaces.QuiverInitializer;
 import cuprum.cmrule.Setting;
+import cuprum.cmrule.impl.DetectEdgeCallback;
 import cuprum.cmrule.impl.HaltRecordCallback;
 import cuprum.cmrule.rules.ECARule;
 
@@ -75,9 +76,12 @@ public class ECARuleTester {
         placeholderConfig.iterationSteps = steps;
         Config.complete(placeholderConfig);
         SaveDotCallback saveDotCallback = new SaveDotCallback();
+        DetectEdgeCallback detectEdgeCallback = new DetectEdgeCallback(1,2);
+        
         saveDotCallback.initialize(placeholderConfig);
 
         machine.addCallback(saveDotCallback);
+        machine.addCallback(detectEdgeCallback);
 
         machine.execute(steps);
 
