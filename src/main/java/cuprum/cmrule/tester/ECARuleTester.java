@@ -11,6 +11,7 @@ import compositionmachine.machine.interfaces.QuiverInitializer;
 import cuprum.cmrule.Setting;
 import cuprum.cmrule.impl.DetectEdgeCallback;
 import cuprum.cmrule.impl.HaltRecordCallback;
+import cuprum.cmrule.impl.OneDimensionalQuiverInitializer;
 import cuprum.cmrule.rules.ECARule;
 
 public class ECARuleTester {
@@ -66,25 +67,29 @@ public class ECARuleTester {
         TesterUtil.writeRuleListToFile(ruleRecord, fileName);
     }
 
-    public static void testOne(int d1, int d2, int d3, int d4, QuiverInitializer<ConnectedQuiver> qInit,
+    public static void testOne(int d1, int d2, int d3, int d4, OneDimensionalQuiverInitializer qInit,
             HaltPredicate predicate, int steps) {
         ECARule rule = new ECARule(d1, d2, d3, d4);
         CompositionMachine<ConnectedQuiver> machine = CompositionMachine.createMachine(qInit, rule, predicate);
 
         Config placeholderConfig = new Config();
-        placeholderConfig.machineName = "eca_" + d1 + "-" + d2 + "-" + d3 + "-" + d4;
+        placeholderConfig.machineName = qInit.getName() + "_eca_" + d1 + "-" + d2 + "-" + d3 + "-" + d4;
         placeholderConfig.iterationSteps = steps;
         Config.complete(placeholderConfig);
         SaveDotCallback saveDotCallback = new SaveDotCallback();
-        DetectEdgeCallback detectEdgeCallback = new DetectEdgeCallback(1,2);
-        
+        DetectEdgeCallback detectMinEdgeCallback = new DetectEdgeCallback(1, 2);
+        DetectEdgeCallback detectMaxEdgeCallback = new DetectEdgeCallback(qInit.getName().length()); // hmmmmm
+
         saveDotCallback.initialize(placeholderConfig);
 
         machine.addCallback(saveDotCallback);
-        machine.addCallback(detectEdgeCallback);
+        machine.addCallback(detectMinEdgeCallback);
+        machine.addCallback(detectMaxEdgeCallback);
 
         machine.execute(steps);
 
-        System.out.println("Rule: " + "eca_" + d1 + "-" + d2 + "-" + d3 + "-" + d4 + " Done!");
+        System.out.println("Quiver: " + qInit.getName());
+        System.out.println("Rule: " + "eca_" + d1 + "-" + d2 + "-" + d3 + "-" + d4);
+        System.out.println("Done!");
     }
 }

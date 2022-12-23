@@ -5,4 +5,5 @@ public class Setting {
     public static final int PRINT_STEP = 4096;
     public static final String HALT_RECORD_FILE = "halt_record.txt";
     public static final String SIMPLIFICATION_RECORD_FILE = "simplification_record.txt";
+    public static final String TEST_BIT_STRING = "000000010000000";
 }

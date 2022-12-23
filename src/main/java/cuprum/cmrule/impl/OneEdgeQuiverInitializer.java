@@ -4,6 +4,7 @@ import compositionmachine.machine.ConnectedQuiver;
 import compositionmachine.machine.Quiver;
 import compositionmachine.machine.interfaces.QuiverInitializer;
 
+@Deprecated
 public class OneEdgeQuiverInitializer implements QuiverInitializer<ConnectedQuiver> {
     @Override
     public Quiver<ConnectedQuiver> generateQuiver() {
