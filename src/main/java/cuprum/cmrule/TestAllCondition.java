@@ -27,7 +27,7 @@ public class TestAllCondition {
         MatchQuiverCallback<ConnectedQuiver> callback = new MatchQuiverCallback<>(matchQuiver);
         MatchAndSimpHaltPredicate<ConnectedQuiver> predicate = new MatchAndSimpHaltPredicate<>(matchQuiver);
 
-        ECARuleTester.testAllConditions(qInit, predicate, new MachineCallback[] { callback }, quiverPattern, 1000,
+        ECARuleTester.testAllConditions(qInit, predicate, new MachineCallback[] { callback }, quiverPattern + "_" + Setting.ALL_CONDITION_RECORD_FILE, 1000,
                 (Object[] haltReturnValue) -> {
                     if (haltReturnValue[1] != null)
                         return true;

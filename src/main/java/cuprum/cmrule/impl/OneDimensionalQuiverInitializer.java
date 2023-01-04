@@ -47,6 +47,7 @@ public class OneDimensionalQuiverInitializer implements QuiverInitializer<Connec
         this.cachedCQ = cq1;
     }
 
+    @Override
     public String getName() {
         return this.initString;
     }
