@@ -19,5 +19,10 @@ public class OneEdgeQuiverInitializer implements QuiverInitializer<ConnectedQuiv
         q.add(q1);
 
         return q;
+    }
+
+    @Override
+    public boolean iterate() {
+        return false;
     };
 }

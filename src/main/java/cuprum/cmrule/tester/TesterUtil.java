@@ -14,6 +14,32 @@ import compositionmachine.util.FileUtil;
 import cuprum.cmrule.Setting;
 
 public class TesterUtil {
+    public static void writeStateAndRuleListToFile(ArrayList<String> stateList, ArrayList<Integer> ruleList, String fileName) {
+        FileUtil.createOrChangeDirectory(Setting.DATA_PATH);
+        File recordFile = Path.of(Setting.DATA_PATH, fileName).toFile();
+        PrintStream recordWriter = null;
+        try {
+            recordWriter = new PrintStream(recordFile, Charset.forName("UTF8"));
+            for(int index = 0; index < ruleList.size(); index++){
+                String statePattern = stateList.get(index);
+                int rulePattern = ruleList.get(index);
+                int d1 = (rulePattern >> 16) & 0x03;
+                int d2 = (rulePattern >> 12) & 0x0F;
+                int d3 = (rulePattern >> 8) & 0x0F;
+                int d4 = rulePattern & 0xFF;
+
+                String ruleName = d1 + "-" + d2 + "-" + d3 + "-" + d4;
+
+                recordWriter.println(statePattern + "," + ruleName);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (recordWriter != null)
+                recordWriter.close();
+        }
+    }
+
     public static void writeRuleListToFile(ArrayList<Integer> ruleList, String fileName) {
         FileUtil.createOrChangeDirectory(Setting.DATA_PATH);
         File recordFile = Path.of(Setting.DATA_PATH, fileName).toFile();

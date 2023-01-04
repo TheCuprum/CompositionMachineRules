@@ -9,6 +9,6 @@ public class TestHalt {
         OneDimensionalQuiverInitializer qInit = new OneDimensionalQuiverInitializer();
         LoopPredicate predicate = new LoopPredicate();
 
-        ECARuleTester.testAll(qInit, predicate, Setting.HALT_RECORD_FILE);
+        ECARuleTester.testAllRules(qInit, predicate, Setting.HALT_RECORD_FILE);
     }
 }

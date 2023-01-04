@@ -22,6 +22,6 @@ public class TestSimplification {
             quiverPattern.length() <= 0 ? Setting.TEST_BIT_STRING : quiverPattern);
         SimplificationHaltPredicate predicate = new SimplificationHaltPredicate();
         
-        ECARuleTester.testAll(qInit, predicate, qInit.getName() + "_" + Setting.SIMPLIFICATION_RECORD_FILE, 1000);
+        ECARuleTester.testAllRules(qInit, predicate, qInit.getName() + "_" + Setting.SIMPLIFICATION_RECORD_FILE, 1000);
     }
 }

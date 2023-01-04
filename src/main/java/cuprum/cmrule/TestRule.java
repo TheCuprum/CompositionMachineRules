@@ -33,6 +33,6 @@ public class TestRule {
                 quiverPattern.length() <= 0 ? Setting.TEST_BIT_STRING : quiverPattern);
         HaltPredicate predicate = new LoopPredicate(20);
 
-        ECARuleTester.testOne(d1, d2, d3, d4, qInit, predicate, 150);
+        ECARuleTester.testOneRule(d1, d2, d3, d4, qInit, predicate, 150);
     }
 }

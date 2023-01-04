@@ -1,12 +1,16 @@
 package cuprum.cmrule.tester;
 
 import java.util.ArrayList;
+import java.util.function.Predicate;
+
+import org.antlr.v4.runtime.dfa.DFAState.PredPrediction;
 
 import compositionmachine.bootstrap.Config;
 import compositionmachine.machine.CompositionMachine;
 import compositionmachine.machine.ConnectedQuiver;
 import compositionmachine.machine.callbacks.SaveDotCallback;
 import compositionmachine.machine.interfaces.HaltPredicate;
+import compositionmachine.machine.interfaces.MachineCallback;
 import compositionmachine.machine.interfaces.QuiverInitializer;
 import cuprum.cmrule.Setting;
 import cuprum.cmrule.impl.DetectEdgeCallback;
@@ -14,14 +18,63 @@ import cuprum.cmrule.impl.HaltRecordCallback;
 import cuprum.cmrule.impl.OneDimensionalQuiverInitializer;
 import cuprum.cmrule.rules.ECARule;
 
+/*
+ * simplification (d2 & d3):
+ * 2 <-> 4
+ * 3 <-> 5
+ * 10 <-> 12
+ * 11 <-> 7
+ */
 public class ECARuleTester {
     public static final int STEPS = 500;
 
-    public static void testAll(QuiverInitializer<ConnectedQuiver> qInit, HaltPredicate predicate, String fileName) {
-        testAll(qInit, predicate, fileName, STEPS);
+    public static void testAllConditions(QuiverInitializer<ConnectedQuiver> qInit, HaltPredicate predicate,
+            MachineCallback[] callbacks, String fileName, int steps, Predicate<Object[]> acceptPredicate) {
+        int totalRules = 1 << (2 + 4 + 4 + 8);
+        HaltRecordCallback haltRecordCallback = new HaltRecordCallback();
+        ArrayList<String> qInitRecord = new ArrayList<>();
+        ArrayList<Integer> ruleRecord = new ArrayList<>();
+        do {
+            for (int i = 0; i < totalRules; i++) {
+                int d1 = (i >> 16) & 0x03;
+                int d2 = (i >> 12) & 0x0F;
+                int d3 = (i >> 8) & 0x0F;
+                int d4 = i & 0xFF;
+
+                if (i % Setting.PRINT_STEP == 0) {
+                    String ruleName = d1 + "-" + d2 + "-" + d3 + "-" + d4;
+                    System.out.print("Rule: " + ruleName + " -- ");
+                }
+
+                ECARule rule = new ECARule(d1, d2, d3, d4);
+                CompositionMachine<ConnectedQuiver> machine = CompositionMachine.createMachine(qInit, rule, predicate);
+                for(MachineCallback cb: callbacks)
+                    machine.addCallback(cb);
+                // machine.addCallback(new PrintBlockCallback());
+                machine.addCallback(haltRecordCallback);
+                Object[] quitState = machine.execute(steps);
+
+                if (acceptPredicate.test(quitState)){
+                    qInitRecord.add(qInit.getName());
+                    ruleRecord.add(i);
+                }
+
+                if (i % Setting.PRINT_STEP == 0)
+                    System.out.println();
+            }
+        } while (qInit.iterate());
+
+        System.out.println("Writing records...");
+
+        TesterUtil.writeStateAndRuleListToFile(qInitRecord, ruleRecord, fileName);
     }
 
-    public static void testAll(QuiverInitializer<ConnectedQuiver> qInit, HaltPredicate predicate, String fileName,
+    public static void testAllRules(QuiverInitializer<ConnectedQuiver> qInit, HaltPredicate predicate,
+            String fileName) {
+        testAllRules(qInit, predicate, fileName, STEPS);
+    }
+
+    public static void testAllRules(QuiverInitializer<ConnectedQuiver> qInit, HaltPredicate predicate, String fileName,
             int steps) {
         int totalRules = 1 << (2 + 4 + 4 + 8);
 
@@ -67,7 +120,7 @@ public class ECARuleTester {
         TesterUtil.writeRuleListToFile(ruleRecord, fileName);
     }
 
-    public static void testOne(int d1, int d2, int d3, int d4, OneDimensionalQuiverInitializer qInit,
+    public static void testOneRule(int d1, int d2, int d3, int d4, OneDimensionalQuiverInitializer qInit,
             HaltPredicate predicate, int steps) {
         ECARule rule = new ECARule(d1, d2, d3, d4);
         CompositionMachine<ConnectedQuiver> machine = CompositionMachine.createMachine(qInit, rule, predicate);
