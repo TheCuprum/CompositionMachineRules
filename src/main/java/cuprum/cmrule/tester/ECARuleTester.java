@@ -3,12 +3,9 @@ package cuprum.cmrule.tester;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 
-import org.antlr.v4.runtime.dfa.DFAState.PredPrediction;
-
 import compositionmachine.bootstrap.Config;
 import compositionmachine.machine.CompositionMachine;
 import compositionmachine.machine.ConnectedQuiver;
-import compositionmachine.machine.Quiver;
 import compositionmachine.machine.callbacks.SaveDotCallback;
 import compositionmachine.machine.interfaces.HaltPredicate;
 import compositionmachine.machine.interfaces.MachineCallback;
