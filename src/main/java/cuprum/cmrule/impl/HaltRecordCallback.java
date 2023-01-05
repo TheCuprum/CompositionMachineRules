@@ -55,7 +55,7 @@ public class HaltRecordCallback implements MachineCallback {
             this.record.add(this.rulePattern);
         }
         this.rulePattern = -1;
-        return null;
+        return Integer.valueOf(step);
         // int suffixLength = 0;
         // int totalSteps = step;
         // while (totalSteps / 10 > 0) {

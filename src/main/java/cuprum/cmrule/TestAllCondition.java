@@ -23,7 +23,7 @@ public class TestAllCondition {
         }
         OneDimensionalQuiverInitializer tempQInit = new OneDimensionalQuiverInitializer(quiverPattern);
         Quiver<ConnectedQuiver> matchQuiver = tempQInit.generateQuiver();
-        OneDimensionalQuiverInitializer qInit = new OneDimensionalQuiverInitializer();
+        OneDimensionalQuiverInitializer qInit = new OneDimensionalQuiverInitializer("0".repeat(quiverPattern.length()));
         MatchQuiverCallback<ConnectedQuiver> callback = new MatchQuiverCallback<>(matchQuiver);
         MatchAndSimpHaltPredicate<ConnectedQuiver> predicate = new MatchAndSimpHaltPredicate<>(matchQuiver);
 

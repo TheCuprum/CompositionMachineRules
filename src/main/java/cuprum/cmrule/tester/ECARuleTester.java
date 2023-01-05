@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.dfa.DFAState.PredPrediction;
 import compositionmachine.bootstrap.Config;
 import compositionmachine.machine.CompositionMachine;
 import compositionmachine.machine.ConnectedQuiver;
+import compositionmachine.machine.Quiver;
 import compositionmachine.machine.callbacks.SaveDotCallback;
 import compositionmachine.machine.interfaces.HaltPredicate;
 import compositionmachine.machine.interfaces.MachineCallback;
@@ -34,6 +35,7 @@ public class ECARuleTester {
         HaltRecordCallback haltRecordCallback = new HaltRecordCallback();
         ArrayList<String> qInitRecord = new ArrayList<>();
         ArrayList<Integer> ruleRecord = new ArrayList<>();
+        ArrayList<Integer> stepRecord = new ArrayList<>();
         do {
             for (int i = 0; i < totalRules; i++) {
                 int d1 = (i >> 16) & 0x03;
@@ -57,6 +59,7 @@ public class ECARuleTester {
                 if (acceptPredicate.test(quitState)){
                     qInitRecord.add(qInit.getName());
                     ruleRecord.add(i);
+                    stepRecord.add((Integer)quitState[quitState.length - 1]);
                 }
 
                 if (i % Setting.PRINT_STEP == 0)
@@ -66,7 +69,7 @@ public class ECARuleTester {
 
         System.out.println("Writing records...");
 
-        TesterUtil.writeStateAndRuleListToFile(qInitRecord, ruleRecord, fileName);
+        TesterUtil.writeStateAndRuleListToFile(qInitRecord, ruleRecord, stepRecord, fileName);
     }
 
     public static void testAllRules(QuiverInitializer<ConnectedQuiver> qInit, HaltPredicate predicate,

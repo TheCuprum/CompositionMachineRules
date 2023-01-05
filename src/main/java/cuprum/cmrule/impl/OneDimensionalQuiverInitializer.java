@@ -38,6 +38,11 @@ public class OneDimensionalQuiverInitializer implements QuiverInitializer<Connec
         this.pregenerateQuiver();
     }
 
+    public static Quiver<ConnectedQuiver> genQuiver(String pattern){
+        OneDimensionalQuiverInitializer qInit = new OneDimensionalQuiverInitializer(pattern);
+        return qInit.generateQuiver();
+    }
+
     private void pregenerateQuiver() {
         ConnectedQuiver cq1 = new ConnectedQuiver();
         for (int state : this.initState) {
