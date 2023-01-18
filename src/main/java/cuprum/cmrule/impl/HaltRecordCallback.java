@@ -14,10 +14,16 @@ public class HaltRecordCallback implements MachineCallback {
     // DotWriter writer;
     private ArrayList<Integer> record = new ArrayList<>();
     private int rulePattern = -1;
+    private boolean outputLog = true;
 
     public HaltRecordCallback() {
         // this.writer = new DotWriter(dotOutputPath, machineName, true);
-
+        this(true);
+    }
+    
+    public HaltRecordCallback(boolean outputLog) {
+        // this.writer = new DotWriter(dotOutputPath, machineName, true);
+        this.outputLog = outputLog;
     }
 
     @Deprecated
@@ -49,7 +55,7 @@ public class HaltRecordCallback implements MachineCallback {
 
     @Override
     public <CQ extends BaseConnectedQuiver<CQ>> Object onHalt(int step, Map<Integer, Quiver<CQ>> quiverHistory) {
-        if (this.rulePattern % Setting.PRINT_STEP == 0)
+        if (this.outputLog && this.rulePattern % Setting.PRINT_STEP == 0)
             System.out.print("HALTS AT TIME " + step + "!");
         if (this.rulePattern > -1 && step > 4) {
             this.record.add(this.rulePattern);

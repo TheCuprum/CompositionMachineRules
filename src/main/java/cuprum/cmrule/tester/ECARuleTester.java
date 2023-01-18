@@ -28,45 +28,65 @@ public class ECARuleTester {
 
     public static void testAllConditions(QuiverInitializer<ConnectedQuiver> qInit, HaltPredicate predicate,
             MachineCallback[] callbacks, String fileName, int steps, Predicate<Object[]> acceptPredicate) {
-        int totalRules = 1 << (2 + 4 + 4 + 8);
-        HaltRecordCallback haltRecordCallback = new HaltRecordCallback();
+                // int totalRules = 1 << (2 + 4 + 4 + 8);
+        int totalRules = 1 << (2 + 4 + 8);
+        HaltRecordCallback haltRecordCallback = new HaltRecordCallback(false);
         ArrayList<String> qInitRecord = new ArrayList<>();
         ArrayList<Integer> ruleRecord = new ArrayList<>();
         ArrayList<Integer> stepRecord = new ArrayList<>();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println();
+            System.out.println("Writing records...");
+            TesterUtil.writeStateAndRuleListToFile(qInitRecord, ruleRecord, stepRecord, fileName);
+        }));
+
+        int counter = 0;
+        String qName = "";
+        System.out.println("Quiver Condition:");
         do {
+            System.out.print("\b".repeat(qName.length()));
+            qName = qInit.getName();
+            System.out.print(qName);
+
             for (int i = 0; i < totalRules; i++) {
-                int d1 = (i >> 16) & 0x03;
-                int d2 = (i >> 12) & 0x0F;
-                int d3 = (i >> 8) & 0x0F;
+                // int d1 = (i >> 16) & 0x03;
+                // int d2 = (i >> 12) & 0x0F;
+                // int d3 = (i >> 8) & 0x0F;
+                // int d4 = i & 0xFF;
+                int d1 = (i >> 12) & 0x03;
+                int d2 = (i >> 8) & 0x0F;
+                int d3 = TesterUtil.mapDelta2RuleNumber(d2);
                 int d4 = i & 0xFF;
 
-                if (i % Setting.PRINT_STEP == 0) {
-                    String ruleName = d1 + "-" + d2 + "-" + d3 + "-" + d4;
-                    System.out.print("Rule: " + ruleName + " -- ");
-                }
+                // if (i % Setting.PRINT_STEP == 0) {
+                // String ruleName = d1 + "-" + d2 + "-" + d3 + "-" + d4;
+                // System.out.print("Rule: " + ruleName + " -- ");
+                // }
 
                 ECARule rule = new ECARule(d1, d2, d3, d4);
-                CompositionMachine<ConnectedQuiver> machine = CompositionMachine.createMachine(qInit, rule, predicate);
-                for(MachineCallback cb: callbacks)
+                CompositionMachine<ConnectedQuiver> machine = CompositionMachine.createMachine(qInit, rule,
+                        predicate);
+                for (MachineCallback cb : callbacks)
                     machine.addCallback(cb);
                 // machine.addCallback(new PrintBlockCallback());
                 machine.addCallback(haltRecordCallback);
                 Object[] quitState = machine.execute(steps);
 
-                if (acceptPredicate.test(quitState)){
+                if (acceptPredicate.test(quitState)) {
                     qInitRecord.add(qInit.getName());
-                    ruleRecord.add(i);
-                    stepRecord.add((Integer)quitState[quitState.length - 1]);
+                    ruleRecord.add(Integer.valueOf((d1 << 16) + (d2 << 12) + (d3 << 8) + d4));
+                    stepRecord.add((Integer) quitState[quitState.length - 1]);
                 }
 
-                if (i % Setting.PRINT_STEP == 0)
-                    System.out.println();
+                // if (i % Setting.PRINT_STEP == 0)
+                // System.out.println();
             }
+            counter++;
         } while (qInit.iterate());
 
-        System.out.println("Writing records...");
-
-        TesterUtil.writeStateAndRuleListToFile(qInitRecord, ruleRecord, stepRecord, fileName);
+        // System.out.println("Writing records...");
+        // TesterUtil.writeStateAndRuleListToFile(qInitRecord, ruleRecord, stepRecord, fileName);
     }
 
     public static void testAllRules(QuiverInitializer<ConnectedQuiver> qInit, HaltPredicate predicate,
@@ -80,6 +100,7 @@ public class ECARuleTester {
 
         HaltRecordCallback haltCallback = new HaltRecordCallback();
         ArrayList<Integer> ruleRecord = new ArrayList<>();
+        // ArrayList<Integer> stepRecord = new ArrayList<>();
 
         /*
          * simplification (d2 & d3):
@@ -108,8 +129,10 @@ public class ECARuleTester {
             // machine.addCallback(new PrintBlockCallback());
             Object[] quitState = machine.execute(steps);
 
-            if (quitState.length > 0)
+            if (quitState.length > 0){
                 ruleRecord.add(i);
+                // stepRecord.add((Integer) quitState[quitState.length - 1]);
+            }
 
             if (i % Setting.PRINT_STEP == 0)
                 System.out.println();
@@ -139,7 +162,7 @@ public class ECARuleTester {
         machine.addCallback(detectMinEdgeCallback);
         machine.addCallback(detectMaxEdgeCallback);
 
-        machine.execute(steps);
+        machine.execute(steps + 1);
 
         System.out.println("Quiver: " + qInit.getName());
         System.out.println("Rule: " + "eca_" + d1 + "-" + d2 + "-" + d3 + "-" + d4);

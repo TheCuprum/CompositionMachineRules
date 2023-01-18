@@ -29,5 +29,10 @@ public class OneEdgeQuiverInitializer implements QuiverInitializer<ConnectedQuiv
     @Override
     public String getName() {
         return this.getClass().getName();
+    }
+
+    @Override
+    public boolean hasNext() {
+        return false;
     };
 }

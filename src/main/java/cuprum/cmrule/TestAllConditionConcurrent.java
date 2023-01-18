@@ -8,9 +8,9 @@ import compositionmachine.machine.interfaces.MachineCallback;
 import cuprum.cmrule.impl.MatchOrSimpHaltPredicate;
 import cuprum.cmrule.impl.MatchQuiverCallback;
 import cuprum.cmrule.impl.OneDimensionalQuiverInitializer;
-import cuprum.cmrule.tester.ECARuleTester;
+import cuprum.cmrule.tester.ConcurrentECARuleTester;
 
-public class TestAllCondition {
+public class TestAllConditionConcurrent {
     public static void main(String[] args) {
         String matchQuiverPattern;
         String startQuiverPattern;
@@ -39,13 +39,17 @@ public class TestAllCondition {
         MatchQuiverCallback<ConnectedQuiver> callback = new MatchQuiverCallback<>(matchQuiver);
         MatchOrSimpHaltPredicate<ConnectedQuiver> predicate = new MatchOrSimpHaltPredicate<>(matchQuiver);
 
-        ECARuleTester.testAllConditions(qInit, predicate, new MachineCallback[] { callback },
+        ConcurrentECARuleTester.testAllConditions(
+                qInit,
+                predicate,
+                new MachineCallback[] { callback },
                 matchQuiverPattern + "_" + Setting.ALL_CONDITION_RECORD_FILE, 1000,
                 (Object[] haltReturnValue) -> {
                     if (haltReturnValue.length > 0 && haltReturnValue[1] != null)
                         return true;
                     else
                         return false;
-                });
+                },
+                4);
     }
 }

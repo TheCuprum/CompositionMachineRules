@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import compositionmachine.machine.Arrow;
 import compositionmachine.machine.interfaces.BaseConnectedQuiver;
@@ -14,13 +15,58 @@ import compositionmachine.util.FileUtil;
 import cuprum.cmrule.Setting;
 
 public class TesterUtil {
-    public static void writeStateAndRuleListToFile(ArrayList<String> stateList, ArrayList<Integer> ruleList, ArrayList<Integer> stepList, String fileName) {
+    public static int mapDelta2RuleNumber(int ruleNumber){
+        if (ruleNumber > 15){
+            throw new IllegalArgumentException("Rule number must less than 16.");
+        }
+        switch (ruleNumber){
+            case 2:
+                return 4;
+            case 3:
+                return 5;
+            case 10:
+                return 12;
+            case 11:
+                return 7;
+            case 4:
+                return 2;
+            case 5:
+                return 3;
+            case 12:
+                return 10;
+            case 7:
+                return 11;
+            default:
+                return ruleNumber;
+        }
+    }
+
+    public static <R extends ECARecord> void writeRecordListToFile(List<R> recordList, String fileName) {
         FileUtil.createOrChangeDirectory(Setting.DATA_PATH);
         File recordFile = Path.of(Setting.DATA_PATH, fileName).toFile();
         PrintStream recordWriter = null;
         try {
             recordWriter = new PrintStream(recordFile, Charset.forName("UTF8"));
-            for(int index = 0; index < ruleList.size(); index++){
+            for(int index = 0; index < recordList.size(); index++){
+                recordWriter.println(recordList.get(index).getStringRepersentation());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (recordWriter != null)
+                recordWriter.close();
+        }
+    }
+
+    @Deprecated
+    public static void writeStateAndRuleListToFile(ArrayList<String> stateList, ArrayList<Integer> ruleList, ArrayList<Integer> stepList, String fileName) {
+        int len = Math.min(Math.min(stateList.size(), ruleList.size()), stepList.size());
+        FileUtil.createOrChangeDirectory(Setting.DATA_PATH);
+        File recordFile = Path.of(Setting.DATA_PATH, fileName).toFile();
+        PrintStream recordWriter = null;
+        try {
+            recordWriter = new PrintStream(recordFile, Charset.forName("UTF8"));
+            for(int index = 0; index < len; index++){
                 String statePattern = stateList.get(index);
                 int rulePattern = ruleList.get(index);
                 String step = stepList.get(index).toString();
@@ -41,6 +87,7 @@ public class TesterUtil {
         }
     }
 
+    @Deprecated
     public static void writeRuleListToFile(ArrayList<Integer> ruleList, String fileName) {
         FileUtil.createOrChangeDirectory(Setting.DATA_PATH);
         File recordFile = Path.of(Setting.DATA_PATH, fileName).toFile();

@@ -3,3 +3,5 @@ data/*
 target/*
 
 **/*.jar
+
+note.md
