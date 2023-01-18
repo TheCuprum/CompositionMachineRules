@@ -16,7 +16,7 @@ public class TestMonitor {
         }
     }
 
-    public void monitor(int miliInterval) {
+    public void monitor(int milliInterval) {
         while (true) {
             for (int index = this.infoLines.size() - 1; index >= 0; index--) {
                 System.out.print("\b".repeat(this.infoLines.get(index).length()));
@@ -33,7 +33,8 @@ public class TestMonitor {
                     stopFlag = false;
                     printString += this.qInitList.get(index).getName();
                 } else {
-                    printString += "Done";
+                    printString += "Done"
+                            + " ".repeat(Math.max(this.qInitList.get(indexCount).getName().length() - 4, 0));
                 }
                 this.infoLines.add(printString);
                 System.out.print(printString);
@@ -46,7 +47,7 @@ public class TestMonitor {
                 break;
 
             try {
-                Thread.sleep(miliInterval);
+                Thread.sleep(milliInterval);
             } catch (InterruptedException e) {
                 System.out.println("Monitor interrupted.");
                 break;

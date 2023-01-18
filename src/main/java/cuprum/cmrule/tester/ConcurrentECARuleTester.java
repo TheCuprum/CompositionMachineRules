@@ -83,7 +83,7 @@ public class ConcurrentECARuleTester {
             //     System.out.println("Write interrupted, there's no record written to the file \"" + fileName + "\"");
             // }
         }));
-    
+
         taskMonitor.monitor(2000);
     }
 }

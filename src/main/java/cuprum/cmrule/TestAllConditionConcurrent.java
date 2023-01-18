@@ -31,9 +31,22 @@ public class TestAllConditionConcurrent {
         if (startQuiverPattern.length() != matchQuiverPattern.length())
             throw new IllegalArgumentException("The quiver patterns must match.");
 
+        long startTime = System.currentTimeMillis();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            long endTime = System.currentTimeMillis();
+            long deltaTime = endTime - startTime;
+            long day = deltaTime / (1000 * 60 * 60 * 24);
+            long hour = deltaTime / (1000 * 60 * 60) % 24;
+            long minute = deltaTime / (1000 * 60) % 60;
+            long second = deltaTime / 1000 % 60;
+            long milli = deltaTime % 1000;
+            System.out.println(String.format("Total Time: %d:%d:%d:%d.%d", day, hour, minute, second, milli));
+        }));
+
         OneDimensionalQuiverInitializer tempQInit = new OneDimensionalQuiverInitializer(matchQuiverPattern);
         Quiver<ConnectedQuiver> matchQuiver = tempQInit.generateQuiver();
-        // OneDimensionalQuiverInitializer qInit = new OneDimensionalQuiverInitializer("0".repeat(matchQuiverPattern.length()));
+        // OneDimensionalQuiverInitializer qInit = new
+        // OneDimensionalQuiverInitializer("0".repeat(matchQuiverPattern.length()));
         OneDimensionalQuiverInitializer qInit = new OneDimensionalQuiverInitializer(startQuiverPattern);
         // qInit.setTerminateState("0".repeat(startQuiverPattern.length()));
         MatchQuiverCallback<ConnectedQuiver> callback = new MatchQuiverCallback<>(matchQuiver);
@@ -51,5 +64,7 @@ public class TestAllConditionConcurrent {
                         return false;
                 },
                 4);
+
+        System.exit(0);
     }
 }
