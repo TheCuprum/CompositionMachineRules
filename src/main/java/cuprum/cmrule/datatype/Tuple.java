@@ -1,4 +1,4 @@
-package cuprum.cmrule.tester;
+package cuprum.cmrule.datatype;
 
 public class Tuple<A, B> {
     private A itemA;

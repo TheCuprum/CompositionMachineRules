@@ -162,7 +162,7 @@ public class ECARuleTester {
         machine.addCallback(detectMinEdgeCallback);
         machine.addCallback(detectMaxEdgeCallback);
 
-        machine.execute(steps + 1);
+        machine.execute(steps);
 
         System.out.println("Quiver: " + qInit.getName());
         System.out.println("Rule: " + "eca_" + d1 + "-" + d2 + "-" + d3 + "-" + d4);

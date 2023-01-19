@@ -12,22 +12,10 @@ import cuprum.cmrule.application.OneDimFunctionMapper;
 import cuprum.cmrule.impl.OneDimensionalQuiverInitializer;
 import cuprum.cmrule.rules.ECARule;
 
-public class ExampleGeneration {
-    public static GeneralFunction getStringFunction(String appendString) {
-        return new GeneralFunction(String.class, String.class, (o) -> ((String) o).concat(appendString));
-    }
-
-    public static GeneralFunction[] generateFunctionList(String inputString) {
-        GeneralFunction[] functionList = new GeneralFunction[inputString.length()];
-        for (int index = 0; index < inputString.length(); index++) {
-            functionList[index] = getStringFunction(inputString.substring(index, index + 1));
-        }
-        return functionList;
-    }
-
-    public static void main(String[] args) {
-        int[] ruleNumber = new int[4];
+public abstract class ExampleGeneration {
+    private Object[] handleArgs(String[] args) {
         String initialQuiverPattern;
+        int[] ruleNumber = new int[4];
         int steps;
         if (args.length == 6) {
             initialQuiverPattern = args[0];
@@ -50,73 +38,52 @@ public class ExampleGeneration {
             sc.close();
         }
 
-        // String funcString = "asdfuhellolihfdu";
-        String funcString = "fuhellol";
-        // String initialQuiverPattern = "00000000";
-        // int[] ruleNumber = new int[] { 0, 1, 1, 247 };
-        // String matchQuiverPattern = "00111110";
-        // int steps = 3;
+        return new Object[] { initialQuiverPattern, ruleNumber, steps };
+    }
 
-        ArrayList<GeneralFunction[]> funcList = new ArrayList<>();
-        GeneralFunction[] funcs = generateFunctionList(funcString);
-        funcList.add(funcs);
+    private Quiver<ConnectedQuiver> runMachine(String initialQuiverPattern, int[] ruleNumber, int steps) {
+        Quiver<ConnectedQuiver> initialQuiver = OneDimensionalQuiverInitializer.genQuiver(initialQuiverPattern);
 
-        // if (funcs.length != initialQuiverPattern.length() || funcs.length !=
-        // matchQuiverPattern.length()) {
-        // System.err.println("Pattern size mismatch.");
-        // System.exit(0);
-        // }
+        CompositionMachine<ConnectedQuiver> machine = CompositionMachine.createMachine(initialQuiver,
+                new ECARule(ruleNumber[0], ruleNumber[1], ruleNumber[2], ruleNumber[3]), new NullPredicate());
 
+        machine.execute(steps);
+
+        return machine.getQuiverHistory().get(steps);
+    }
+
+    public void runGeneration(String[] args) {
+        Object[] parsedArgs = this.handleArgs(args);
+        String initialQuiverPattern = (String) parsedArgs[0];
+        int[] ruleNumber = (int[]) parsedArgs[1];
+        int steps = (int) parsedArgs[2];
+
+        GeneralFunction[] funcs = this.provideFunctions();
         if (funcs.length != initialQuiverPattern.length()) {
             System.err.println("Pattern size mismatch.");
             System.exit(0);
         }
 
+        ArrayList<GeneralFunction[]> funcList = new ArrayList<>();
+        funcList.add(funcs);
         OneDimFunctionMapper mapper = new OneDimFunctionMapper(funcList);
-        Quiver<ConnectedQuiver> initialQuiver = OneDimensionalQuiverInitializer.genQuiver(initialQuiverPattern);
-        // Quiver<ConnectedQuiver> matchQuiver =
-        // OneDimensionalQuiverInitializer.genQuiver(matchQuiverPattern);
 
-        // MatchAndSimpHaltPredicate<ConnectedQuiver> predicate = new
-        // MatchAndSimpHaltPredicate<>(matchQuiver);
-        // MatchQuiverCallback<ConnectedQuiver> matchQuiverCallback = new
-        // MatchQuiverCallback<>(matchQuiver);
-        // HaltRecordCallback haltRecordCallback = new HaltRecordCallback();
-        // CompositionMachine<ConnectedQuiver> machine =
-        // CompositionMachine.createMachine(initialQuiver,
-        // new ECARule(ruleNumber[0], ruleNumber[1], ruleNumber[2], ruleNumber[3]),
-        // predicate);
-        // machine.addCallback(matchQuiverCallback);
-        // machine.addCallback(haltRecordCallback);
+        Quiver<ConnectedQuiver> quiver = this.runMachine(initialQuiverPattern, ruleNumber, steps);
 
-        // Object[] result = machine.execute(steps);
-
-        // if (result.length > 0){
-        // GeneralFunction[] outFunctions =
-        // mapper.mapFunctions((Quiver<ConnectedQuiver>)result[1]);
-        // System.out.println("Output function count: " + outFunctions.length);
-        // System.out.println("Test input: " + "[empty string]");
-        // for (GeneralFunction fn : outFunctions) {
-        // System.out.println("Output: " + fn.apply(""));
-        // }
-        // }
-
-        CompositionMachine<ConnectedQuiver> machine = CompositionMachine.createMachine(initialQuiver,
-                new ECARule(ruleNumber[0], ruleNumber[1], ruleNumber[2], ruleNumber[3]), new NullPredicate());
-
-        machine.execute(steps + 1);
-
-        Quiver<ConnectedQuiver> quiver = machine.getQuiverHistory().get(steps);
-        // for (int index = 0; index <= steps; index++) {
-        //     System.out.println(machine.getQuiverHistory().get(index));
-        // }
         if (quiver != null) {
             GeneralFunction[] outFunctions = mapper.mapFunctions(quiver);
+            System.out.println("Quiver shape: " + quiver.toString());
             System.out.println("Output function count: " + outFunctions.length);
-            System.out.println("Test input: " + "[empty string]");
             for (GeneralFunction fn : outFunctions) {
-                System.out.println("Output: " + fn.apply(""));
+                Object input = this.provideInputObject(fn.getInClass());
+                Object output = fn.apply(input);
+                System.out.println("Test input: " + input.toString());
+                System.out.println("Output: " + output.toString());
             }
         }
     }
+
+    protected abstract GeneralFunction[] provideFunctions();
+
+    protected abstract Object provideInputObject(Class<?> cls);
 }
