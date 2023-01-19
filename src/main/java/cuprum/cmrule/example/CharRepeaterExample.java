@@ -45,7 +45,6 @@ public class CharRepeaterExample extends ExampleGeneration {
 
     @Override
     protected Object provideInputObject(Class<?> cls) {
-        System.out.println(cls.getName());
         if (cls == Long.class)
             return Long.valueOf((((long)'a' & 0xFF) << 32) | (10 & 0xFFFFFFFF));
         else

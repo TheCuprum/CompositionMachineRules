@@ -72,7 +72,7 @@ public abstract class ExampleGeneration {
 
         if (quiver != null) {
             GeneralFunction[] outFunctions = mapper.mapFunctions(quiver);
-            System.out.println("Quiver shape: " + quiver.toString());
+            // System.out.println("Quiver shape: " + quiver.toString());
             System.out.println("Output function count: " + outFunctions.length);
             for (GeneralFunction fn : outFunctions) {
                 Object input = this.provideInputObject(fn.getInClass());
