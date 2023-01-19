@@ -27,14 +27,14 @@ public class TesterUtil {
             case 10:
                 return 12;
             case 11:
-                return 7;
+                return 13;
             case 4:
                 return 2;
             case 5:
                 return 3;
             case 12:
                 return 10;
-            case 7:
+            case 13:
                 return 11;
             default:
                 return ruleNumber;
