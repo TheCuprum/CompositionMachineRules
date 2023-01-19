@@ -39,5 +39,4 @@ public class MatchQuiverCallback<Q extends BaseConnectedQuiver<Q>> implements Ma
         else
             return null;
     }
-    
 }

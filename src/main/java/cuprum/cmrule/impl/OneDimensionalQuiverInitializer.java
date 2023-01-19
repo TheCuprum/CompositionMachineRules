@@ -94,7 +94,7 @@ public class OneDimensionalQuiverInitializer implements QuiverInitializer<Connec
         if (!this.next)
             return false;
 
-        if (Arrays.equals(this.initState, this.terminateState)){
+        if (Arrays.equals(this.initState, this.terminateState)) {
             this.next = false;
             return false;
         }
@@ -108,8 +108,10 @@ public class OneDimensionalQuiverInitializer implements QuiverInitializer<Connec
                 }
                 // iterationSuccess = true;
                 // break;
-                this.initString = RuleUtil.intArrayToString(this.initState);
-                this.pregenerateQuiver();
+                synchronized (this) {
+                    this.initString = RuleUtil.intArrayToString(this.initState);
+                }
+                    this.pregenerateQuiver();
                 return true;
             }
             // == 1 continue;
@@ -179,7 +181,7 @@ public class OneDimensionalQuiverInitializer implements QuiverInitializer<Connec
         long initNum = bitArray2LongNumber(this.initState);
         long endNum = bitArray2LongNumber(this.terminateState);
 
-        long interval = (long) Math.ceil((endNum - initNum) / (double)splitCount);
+        long interval = (long) Math.ceil((endNum - initNum) / (double) splitCount);
 
         Long previousNum = initNum;
         Long currentNum = initNum + interval;

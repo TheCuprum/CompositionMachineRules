@@ -27,7 +27,7 @@ public class ConcurrentECARuleTester {
         List<AllConditionRecord> record = Collections.synchronizedList(new ArrayList<>());
         TestMonitor taskMonitor = new TestMonitor(SubQInitList);
 
-        for (int index = 0 ; index < SubQInitList.size(); index++) {
+        for (int index = 0; index < SubQInitList.size(); index++) {
             System.out.println("Start Position-" + index + ": " + SubQInitList.get(index).getName());
         }
         System.out.println();
@@ -50,7 +50,7 @@ public class ConcurrentECARuleTester {
                         int d4 = i & 0xFF;
 
                         ECARule rule = new ECARule(d1, d2, d3, d4);
-                        CompositionMachine<ConnectedQuiver> machine = CompositionMachine.createMachine(qInit, rule,
+                        CompositionMachine<ConnectedQuiver> machine = CompositionMachine.createMachine(subQInit, rule,
                                 predicate);
                         for (MachineCallback cb : callbacks)
                             machine.addCallback(cb);
@@ -73,14 +73,15 @@ public class ConcurrentECARuleTester {
             System.out.println();
             System.out.println("Writing records...");
             // try {
-                executor.shutdown();
-                // executor.wait(60 * 1000);
-                record.sort((AllConditionRecord o1, AllConditionRecord o2) -> {
-                        return o1.compareTo(o2);
-                    });
-                TesterUtil.writeRecordListToFile(record, fileName);
+            executor.shutdown();
+            // executor.wait(60 * 1000);
+            record.sort((AllConditionRecord o1, AllConditionRecord o2) -> {
+                return o1.compareTo(o2);
+            });
+            TesterUtil.writeRecordListToFile(record, fileName);
             // } catch (InterruptedException ie) {
-            //     System.out.println("Write interrupted, there's no record written to the file \"" + fileName + "\"");
+            // System.out.println("Write interrupted, there's no record written to the file
+            // \"" + fileName + "\"");
             // }
         }));
 

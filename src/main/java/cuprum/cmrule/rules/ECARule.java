@@ -9,10 +9,10 @@ public class ECARule extends RuleSet {
     protected int delta4RulePattern; // 8bit int
 
     public ECARule(int delta1Rule, int delta2Rule, int delta3Rule, int delta4Rule){
-        this.delta1RulePattern = delta1Rule;
-        this.delta2RulePattern = delta2Rule;
-        this.delta3RulePattern = delta3Rule;
-        this.delta4RulePattern = delta4Rule;
+        this.delta1RulePattern = delta1Rule & 0x03;
+        this.delta2RulePattern = delta2Rule & 0x0F;
+        this.delta3RulePattern = delta3Rule & 0x0F;
+        this.delta4RulePattern = delta4Rule & 0xFF;
     }
 
     @Override

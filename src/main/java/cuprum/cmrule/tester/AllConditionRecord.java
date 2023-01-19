@@ -20,10 +20,10 @@ public class AllConditionRecord implements ECARecord, Comparable<AllConditionRec
         int d4 = this.rulePattern & 0xFF;
 
         sb.append(this.quiverName)
-            .append(',')
-            .append(d1).append('-').append(d2).append('-').append(d3).append('-').append(d4)
-            .append(',')
-            .append(this.step);
+                .append(',')
+                .append(d1).append('-').append(d2).append('-').append(d3).append('-').append(d4)
+                .append(',')
+                .append(this.step);
 
         return sb.toString();
     }
@@ -31,7 +31,7 @@ public class AllConditionRecord implements ECARecord, Comparable<AllConditionRec
     @Override
     public int compareTo(AllConditionRecord o) {
         int compareResult = this.quiverName.compareTo(o.getQuiverName());
-        if (compareResult == 0){
+        if (compareResult == 0) {
             return this.rulePattern.compareTo(o.getRulePattern());
         }
         return compareResult;

@@ -107,7 +107,7 @@ public class ECARuleTester {
          * 2 <-> 4
          * 3 <-> 5
          * 10 <-> 12
-         * 11 <-> 7
+         * 11 <-> 13
          */
 
         for (int i = 0; i < totalRules; i++) {
