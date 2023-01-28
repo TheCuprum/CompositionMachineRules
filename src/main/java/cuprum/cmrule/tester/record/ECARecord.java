@@ -1,4 +1,4 @@
-package cuprum.cmrule.tester;
+package cuprum.cmrule.tester.record;
 
 public interface ECARecord {
     public abstract String getStringRepersentation();

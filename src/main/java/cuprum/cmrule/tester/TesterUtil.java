@@ -13,13 +13,18 @@ import compositionmachine.machine.Arrow;
 import compositionmachine.machine.interfaces.BaseConnectedQuiver;
 import compositionmachine.util.FileUtil;
 import cuprum.cmrule.Setting;
+import cuprum.cmrule.tester.record.ECARecord;
 
 public class TesterUtil {
-    public static int mapDelta2RuleNumber(int ruleNumber){
-        if (ruleNumber > 15){
+    public static int combineECARulePattern(int d1, int d2, int d3, int d4) {
+        return (d1 << 16) + (d2 << 12) + (d3 << 8) + d4;
+    }
+
+    public static int mapDelta2RuleNumber(int ruleNumber) {
+        if (ruleNumber > 15) {
             throw new IllegalArgumentException("Rule number must less than 16.");
         }
-        switch (ruleNumber){
+        switch (ruleNumber) {
             case 2:
                 return 4;
             case 3:
@@ -47,7 +52,7 @@ public class TesterUtil {
         PrintStream recordWriter = null;
         try {
             recordWriter = new PrintStream(recordFile, Charset.forName("UTF8"));
-            for(int index = 0; index < recordList.size(); index++){
+            for (int index = 0; index < recordList.size(); index++) {
                 recordWriter.println(recordList.get(index).getStringRepersentation());
             }
         } catch (IOException e) {
@@ -59,14 +64,15 @@ public class TesterUtil {
     }
 
     @Deprecated
-    public static void writeStateAndRuleListToFile(ArrayList<String> stateList, ArrayList<Integer> ruleList, ArrayList<Integer> stepList, String fileName) {
+    public static void writeStateAndRuleListToFile(ArrayList<String> stateList, ArrayList<Integer> ruleList,
+            ArrayList<Integer> stepList, String fileName) {
         int len = Math.min(Math.min(stateList.size(), ruleList.size()), stepList.size());
         FileUtil.createOrChangeDirectory(Setting.DATA_PATH);
         File recordFile = Path.of(Setting.DATA_PATH, fileName).toFile();
         PrintStream recordWriter = null;
         try {
             recordWriter = new PrintStream(recordFile, Charset.forName("UTF8"));
-            for(int index = 0; index < len; index++){
+            for (int index = 0; index < len; index++) {
                 String statePattern = stateList.get(index);
                 int rulePattern = ruleList.get(index);
                 String step = stepList.get(index).toString();

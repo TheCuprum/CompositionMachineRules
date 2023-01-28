@@ -1,4 +1,4 @@
-package cuprum.cmrule.tester;
+package cuprum.cmrule.tester.record;
 
 public class AllRuleRecord implements ECARecord, Comparable<AllRuleRecord> {
     private Integer rulePattern;

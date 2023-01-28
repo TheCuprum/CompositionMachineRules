@@ -1,4 +1,4 @@
-package cuprum.cmrule.tester;
+package cuprum.cmrule.tester.record;
 
 public class AllConditionRecord implements ECARecord, Comparable<AllConditionRecord> {
     private String quiverName;

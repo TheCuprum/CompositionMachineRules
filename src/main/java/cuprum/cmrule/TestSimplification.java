@@ -17,11 +17,12 @@ public class TestSimplification {
             quiverPattern = sc.nextLine();
             sc.close();
         }
-        // OneDimensionalQuiverInitializer qInit = new OneDimensionalQuiverInitializer(Setting.TEST_BIT_STRING);
+        // OneDimensionalQuiverInitializer qInit = new
+        // OneDimensionalQuiverInitializer(Setting.TEST_BIT_STRING);
         OneDimensionalQuiverInitializer qInit = new OneDimensionalQuiverInitializer(
-            quiverPattern.length() <= 0 ? Setting.TEST_BIT_STRING : quiverPattern);
+                quiverPattern.length() <= 0 ? Setting.TEST_BIT_STRING : quiverPattern);
         SimplificationHaltPredicate predicate = new SimplificationHaltPredicate();
-        
+
         ECARuleTester.testAllRules(qInit, predicate, qInit.getName() + "_" + Setting.SIMPLIFICATION_RECORD_FILE, 1000);
     }
 }
