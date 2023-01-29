@@ -17,7 +17,7 @@ public class OneDimensionalQuiverInitializer implements QuiverInitializer<Connec
     protected int[] terminateState;
     protected ConnectedQuiver cachedCQ;
 
-    protected volatile boolean next = true;
+    protected volatile boolean available = true;
 
     public OneDimensionalQuiverInitializer() {
         this("000000000");
@@ -44,7 +44,7 @@ public class OneDimensionalQuiverInitializer implements QuiverInitializer<Connec
         return qInit.generateQuiver();
     }
 
-    private static int[] generateStateArray(String bitString) {
+    protected static int[] generateStateArray(String bitString) {
         int[] stateArray = new int[bitString.length()];
         for (int index = 0; index < bitString.length(); index++) {
             char c = bitString.charAt(index);
@@ -66,7 +66,7 @@ public class OneDimensionalQuiverInitializer implements QuiverInitializer<Connec
         this.terminateState = Arrays.copyOf(termState, termState.length);
     }
 
-    private void pregenerateQuiver() {
+    protected void pregenerateQuiver() {
         ConnectedQuiver cq1 = new ConnectedQuiver();
         for (int state : this.initState) {
             cq1.addArrow(state);
@@ -91,11 +91,11 @@ public class OneDimensionalQuiverInitializer implements QuiverInitializer<Connec
 
     @Override
     public boolean iterate() {
-        if (!this.next)
+        if (!this.available)
             return false;
 
         if (Arrays.equals(this.initState, this.terminateState)) {
-            this.next = false;
+            this.available = false;
             return false;
         }
 
@@ -116,7 +116,7 @@ public class OneDimensionalQuiverInitializer implements QuiverInitializer<Connec
             }
             // == 1 continue;
         }
-        this.next = false;
+        this.available = false;
         return false;
 
         // if (!Arrays.equals(this.initState, this.terminateState)) {
@@ -202,7 +202,7 @@ public class OneDimensionalQuiverInitializer implements QuiverInitializer<Connec
     }
 
     @Override
-    public boolean hasNext() {
-        return this.next;
+    public boolean isAvailable() {
+        return this.available;
     }
 }

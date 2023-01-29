@@ -11,9 +11,7 @@ public class TestMonitor {
     private List<String> infoLines = new ArrayList<>();
 
     public TestMonitor(List<OneDimensionalQuiverInitializer> qInitList) {
-        for (OneDimensionalQuiverInitializer qInit : qInitList) {
-            this.qInitList.add(qInit);
-        }
+        this.qInitList.addAll(qInitList);
     }
 
     public void monitor(int milliInterval) {
@@ -29,7 +27,7 @@ public class TestMonitor {
             boolean stopFlag = true;
             for (int index = 0; index < this.qInitList.size(); index++) {
                 String printString = "Task-" + indexCount + ": ";
-                if (this.qInitList.get(index).hasNext()) {
+                if (this.qInitList.get(index).isAvailable()) {
                     stopFlag = false;
                     printString += this.qInitList.get(index).getName();
                 } else {
@@ -43,8 +41,10 @@ public class TestMonitor {
 
                 indexCount++;
             }
-            if (stopFlag)
+            if (stopFlag){
+                System.out.println();
                 break;
+            }
 
             try {
                 Thread.sleep(milliInterval);

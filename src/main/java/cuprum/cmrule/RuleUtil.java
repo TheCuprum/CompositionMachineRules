@@ -16,4 +16,8 @@ public class RuleUtil {
         }
         return sb.toString();
     }
+
+    public static int combineECARulePattern(int d1, int d2, int d3, int d4) {
+        return (d1 << 16) + (d2 << 12) + (d3 << 8) + d4;
+    }
 }

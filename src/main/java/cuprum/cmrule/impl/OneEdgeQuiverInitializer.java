@@ -32,7 +32,7 @@ public class OneEdgeQuiverInitializer implements QuiverInitializer<ConnectedQuiv
     }
 
     @Override
-    public boolean hasNext() {
+    public boolean isAvailable() {
         return false;
     };
 }

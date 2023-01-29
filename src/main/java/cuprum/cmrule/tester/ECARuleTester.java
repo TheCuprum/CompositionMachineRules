@@ -1,8 +1,10 @@
 package cuprum.cmrule.tester;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +13,7 @@ import java.util.function.Predicate;
 
 import compositionmachine.bootstrap.Config;
 import compositionmachine.machine.ConnectedQuiver;
+import compositionmachine.machine.Quiver;
 import compositionmachine.machine.callbacks.SaveDotCallback;
 import compositionmachine.machine.interfaces.HaltPredicate;
 import compositionmachine.machine.interfaces.MachineCallback;
@@ -18,6 +21,8 @@ import compositionmachine.machine.interfaces.QuiverInitializer;
 import cuprum.cmrule.Setting;
 import cuprum.cmrule.impl.DetectEdgeCallback;
 import cuprum.cmrule.impl.HaltRecordCallback;
+import cuprum.cmrule.impl.MatchOrSimpHaltPredicate;
+import cuprum.cmrule.impl.MatchQuiverCallback;
 import cuprum.cmrule.impl.OneDimensionalQuiverInitializer;
 import cuprum.cmrule.tester.record.AllConditionRecord;
 import cuprum.cmrule.tester.record.AllRuleRecord;
@@ -33,28 +38,93 @@ import cuprum.cmrule.tester.record.RecordProviderArgs;
 public class ECARuleTester {
     public static final int STEPS = 500;
 
-    public static void testAllConditionsConcurrent(OneDimensionalQuiverInitializer qInit, HaltPredicate predicate,
-            MachineCallback[] callbacks, String fileName, int steps, Predicate<Object[]> acceptPredicate,
-            int concurrentSize) {
+    public static void testAllMatchesConcurrent(
+            OneDimensionalQuiverInitializer targetQInit, OneDimensionalQuiverInitializer startQInit,
+            String dataDirectory, String fileNamePostfix, int maxSteps,
+            int concurrentSize, int monitorMilliInterval) {
 
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
                 concurrentSize, concurrentSize, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-        List<OneDimensionalQuiverInitializer> SubQInitList = qInit.split(concurrentSize);
-        List<AllConditionRecord> record = Collections.synchronizedList(new ArrayList<>());
-        TestMonitor taskMonitor = new TestMonitor(SubQInitList);
 
+        Thread taskSubmitThread = new Thread(() -> {
+            while (targetQInit.isAvailable()) {
+                Quiver<ConnectedQuiver> targetQuiver = targetQInit.generateQuiver();
+                MatchQuiverCallback<ConnectedQuiver> callback = new MatchQuiverCallback<>(targetQuiver);
+                MatchOrSimpHaltPredicate<ConnectedQuiver> predicate = new MatchOrSimpHaltPredicate<>(targetQuiver);
+
+                List<AllConditionRecord> record = Collections.synchronizedList(new ArrayList<>());
+                List<OneDimensionalQuiverInitializer> SubQInitList = startQInit.split(concurrentSize);
+                CountDownLatch latch = new CountDownLatch(SubQInitList.size());
+
+                Thread recordCollectThread = new Thread(() -> {
+                    try {
+                        latch.await();
+                        record.sort((AllConditionRecord o1, AllConditionRecord o2) -> {
+                            return o1.compareTo(o2);
+                        });
+                        TesterUtil.writeRecordListToFile(record,
+                                Path.of(Setting.DATA_PATH, dataDirectory).toString(),
+                                targetQInit.getName() + "_" + fileNamePostfix);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }, "Record Collect Thread-" + targetQInit.getName());
+                recordCollectThread.start();
+
+                for (OneDimensionalQuiverInitializer subQInit : SubQInitList) {
+                    executor.execute(() -> {
+                        ECARuleTesterCore.runAllConditions(
+                                subQInit, predicate, new MachineCallback[] { callback }, maxSteps,
+                                getRecordProvider((Object[] haltReturnValue) -> {
+                                    if (haltReturnValue.length > 0 && haltReturnValue[1] != null)
+                                        return true;
+                                    else
+                                        return false;
+                                }), record, false, false);
+                        latch.countDown();
+                    });
+                }
+                targetQInit.iterate();
+            }
+        }, "Task Submit Thread");
+        taskSubmitThread.start();
+
+        List<OneDimensionalQuiverInitializer> qList = new ArrayList<>();
+        qList.add(targetQInit);
+        TestMonitor taskMonitor = new TestMonitor(qList);
+        taskMonitor.monitor(monitorMilliInterval);
+
+        try {
+            executor.shutdown();
+            executor.awaitTermination(10, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void testAllConditionsConcurrent(OneDimensionalQuiverInitializer qInit, HaltPredicate predicate,
+            MachineCallback[] callbacks, String fileName, int maxSteps, Predicate<Object[]> acceptPredicate,
+            int concurrentSize) {
+        List<OneDimensionalQuiverInitializer> SubQInitList = qInit.split(concurrentSize);
         for (int index = 0; index < SubQInitList.size(); index++) {
             System.out.println("Start Position-" + index + ": " + SubQInitList.get(index).getName());
         }
         System.out.println();
 
-        for (OneDimensionalQuiverInitializer subQInit : SubQInitList) {
-            executor.execute(() -> {
-                ECARuleTesterCore.runAllConditions(subQInit, predicate, callbacks, steps,
-                    getRecordProvider(acceptPredicate), record,
-                    false, false);
-            });
-        }
+        List<AllConditionRecord> record = Collections.synchronizedList(new ArrayList<>());
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+                concurrentSize, concurrentSize, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+
+        Thread taskSubmitThread = new Thread(() -> {
+            for (OneDimensionalQuiverInitializer subQInit : SubQInitList) {
+                executor.execute(() -> {
+                    ECARuleTesterCore.runAllConditions(subQInit, predicate, callbacks, maxSteps,
+                            getRecordProvider(acceptPredicate), record,
+                            false, false);
+                });
+            }
+        });
+        taskSubmitThread.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println();
@@ -72,19 +142,20 @@ public class ECARuleTester {
             // }
         }));
 
+        TestMonitor taskMonitor = new TestMonitor(SubQInitList);
         taskMonitor.monitor(2000);
     }
 
     public static void testAllConditions(OneDimensionalQuiverInitializer qInit, HaltPredicate predicate,
-            MachineCallback[] callbacks, String fileName, int steps, Predicate<Object[]> acceptPredicate) {
+            MachineCallback[] callbacks, String fileName, int maxSteps, Predicate<Object[]> acceptPredicate) {
         List<AllConditionRecord> conditionRecord = Collections.synchronizedList(new ArrayList<>());
 
         List<OneDimensionalQuiverInitializer> qInitList = new ArrayList<>();
         qInitList.add(qInit);
-        TestMonitor taskMontor = new TestMonitor(qInitList);
+        TestMonitor taskMonitor = new TestMonitor(qInitList);
 
         Thread taskThread = new Thread(() -> {
-            ECARuleTesterCore.runAllConditions(qInit, predicate, callbacks, steps,
+            ECARuleTesterCore.runAllConditions(qInit, predicate, callbacks, maxSteps,
                     getRecordProvider(acceptPredicate), conditionRecord,
                     false, false);
         });
@@ -95,8 +166,8 @@ public class ECARuleTester {
             TesterUtil.writeRecordListToFile(conditionRecord, fileName);
         }));
 
-        taskThread.run();
-        taskMontor.monitor(5000);
+        taskThread.start();
+        taskMonitor.monitor(5000);
     }
 
     private static Function<RecordProviderArgs, AllConditionRecord> getRecordProvider(

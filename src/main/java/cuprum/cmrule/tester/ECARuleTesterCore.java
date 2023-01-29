@@ -8,12 +8,26 @@ import compositionmachine.machine.ConnectedQuiver;
 import compositionmachine.machine.interfaces.HaltPredicate;
 import compositionmachine.machine.interfaces.MachineCallback;
 import compositionmachine.machine.interfaces.QuiverInitializer;
+import cuprum.cmrule.RuleUtil;
 import cuprum.cmrule.datatype.Tuple;
 import cuprum.cmrule.rules.ECARule;
 import cuprum.cmrule.tester.record.ECARecord;
 import cuprum.cmrule.tester.record.RecordProviderArgs;
 
 public class ECARuleTesterCore {
+    // public static <R extends ECARecord> List<R> runAllMatches(
+    //         QuiverInitializer<ConnectedQuiver> targetQInit, QuiverInitializer<ConnectedQuiver> startQInit,
+    //         HaltPredicate predicate, MachineCallback[] callbacks, int steps,
+    //         Function<RecordProviderArgs, R> recordProvider, List<R> recordStorage,
+    //         boolean onlyFindOneQuiver, boolean onlyFindOneRule) {
+    //     do {
+    //         List<R> ruleRecord = runAllConditions(startQInit, predicate, callbacks, steps, recordProvider,
+    //                 recordStorage, onlyFindOneQuiver, onlyFindOneRule);
+    //         recordStorage.addAll(ruleRecord);
+    //     } while (targetQInit.iterate());
+    //     return recordStorage;
+    // }
+
     public static <R extends ECARecord> List<R> runAllConditions(
             QuiverInitializer<ConnectedQuiver> qInit, HaltPredicate predicate,
             MachineCallback[] callbacks, int steps,
@@ -50,7 +64,8 @@ public class ECARuleTesterCore {
             R reocrd = recordProvider.apply(providerArgs);
             if (reocrd != null) {
                 ruleRecord.add(reocrd);
-                if (onlyFindOne) break;
+                if (onlyFindOne)
+                    break;
             }
         }
         return ruleRecord;
@@ -80,13 +95,14 @@ public class ECARuleTesterCore {
                     d1, d2, d3, d4, qInit, predicate, callbacks, steps);
 
             RecordProviderArgs providerArgs = new RecordProviderArgs(
-                    TesterUtil.combineECARulePattern(d1, d2, d3, d4), qInit,
+                    RuleUtil.combineECARulePattern(d1, d2, d3, d4), qInit,
                     quitTuple.getItemA(), quitTuple.getItemB());
 
             R reocrd = recordProvider.apply(providerArgs);
             if (reocrd != null) {
                 ruleRecord.add(reocrd);
-                if (onlyFindOne) break;
+                if (onlyFindOne)
+                    break;
             }
         }
         return ruleRecord;
