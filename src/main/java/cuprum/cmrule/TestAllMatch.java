@@ -11,7 +11,8 @@ public class TestAllMatch {
     private static List1DQuiverInitializer provideInitializer() {
         return new List1DQuiverInitializer(new String[] {
                 "00110",
-                // "01110",
+                "01110",
+                "01100",
         });
     }
 

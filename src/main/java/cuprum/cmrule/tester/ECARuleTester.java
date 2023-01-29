@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -37,14 +38,16 @@ import cuprum.cmrule.tester.record.RecordProviderArgs;
  */
 public class ECARuleTester {
     public static final int STEPS = 500;
+    public static final int CHECK_POOL_MILLI = 10000;
 
     public static void testAllMatchesConcurrent(
             OneDimensionalQuiverInitializer targetQInit, OneDimensionalQuiverInitializer startQInit,
             String dataDirectory, String fileNamePostfix, int maxSteps,
             int concurrentSize, int monitorMilliInterval) {
 
+        BlockingQueue<Runnable> taskQueue =  new LinkedBlockingQueue<>();
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
-                concurrentSize, concurrentSize, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+                concurrentSize, concurrentSize, 5, TimeUnit.SECONDS, taskQueue);
 
         Thread taskSubmitThread = new Thread(() -> {
             while (targetQInit.isAvailable()) {
@@ -56,6 +59,7 @@ public class ECARuleTester {
                 List<OneDimensionalQuiverInitializer> SubQInitList = startQInit.split(concurrentSize);
                 CountDownLatch latch = new CountDownLatch(SubQInitList.size());
 
+                String qInitName = targetQInit.getName();
                 Thread recordCollectThread = new Thread(() -> {
                     try {
                         latch.await();
@@ -64,11 +68,11 @@ public class ECARuleTester {
                         });
                         TesterUtil.writeRecordListToFile(record,
                                 Path.of(Setting.DATA_PATH, dataDirectory).toString(),
-                                targetQInit.getName() + "_" + fileNamePostfix);
+                                qInitName + "_" + fileNamePostfix);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                }, "Record Collect Thread-" + targetQInit.getName());
+                }, "Record Collect Thread-" + qInitName);
                 recordCollectThread.start();
 
                 for (OneDimensionalQuiverInitializer subQInit : SubQInitList) {
@@ -84,15 +88,27 @@ public class ECARuleTester {
                         latch.countDown();
                     });
                 }
+
+                while (taskQueue.size() >= concurrentSize){
+                    try {
+                        Thread.sleep(CHECK_POOL_MILLI);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 targetQInit.iterate();
             }
         }, "Task Submit Thread");
         taskSubmitThread.start();
 
-        List<OneDimensionalQuiverInitializer> qList = new ArrayList<>();
-        qList.add(targetQInit);
-        TestMonitor taskMonitor = new TestMonitor(qList);
-        taskMonitor.monitor(monitorMilliInterval);
+        Thread monitorThread = new Thread(() -> {
+            List<OneDimensionalQuiverInitializer> qList = new ArrayList<>();
+            qList.add(targetQInit);
+            TestMonitor taskMonitor = new TestMonitor(qList);
+            taskMonitor.monitor(monitorMilliInterval);
+        }, "Task Monitor Thread");
+        monitorThread.run();
 
         try {
             executor.shutdown();
