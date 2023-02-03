@@ -2,7 +2,7 @@ package cuprum.cmrule.tester.record;
 
 import cuprum.cmrule.RuleUtil;
 
-public class AllMatchRecord implements ECARecord, Comparable<AllMatchRecord> {
+public class AllMatchRecord implements ECARecord<AllMatchRecord> {
     private String targetQuiverName;
     private String startQuiverName;
     private Integer rulePattern;

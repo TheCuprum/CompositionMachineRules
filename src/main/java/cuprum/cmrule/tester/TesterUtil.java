@@ -6,9 +6,9 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 
 import compositionmachine.machine.Arrow;
 import compositionmachine.machine.interfaces.BaseConnectedQuiver;
@@ -58,19 +58,19 @@ public class TesterUtil {
         }
     }
 
-    public static <R extends ECARecord> void writeRecordListToFile(List<R> recordList, String fileName) {
-        writeRecordListToFile(recordList, Setting.DATA_PATH, fileName);
+    public static <R extends ECARecord<R>> void writeRecordsToFile(Collection<R> recordCollection, String fileName) {
+        writeRecordsToFile(recordCollection, Setting.DATA_PATH, fileName);
     }
 
-    public static <R extends ECARecord> void writeRecordListToFile(
-            List<R> recordList, String dataPath, String fileName) {
+    public static <R extends ECARecord<R>> void writeRecordsToFile(
+            Collection<R> recordCollection, String dataPath, String fileName) {
         File dataDir = FileUtil.createOrChangeDirectory(dataPath);
         File recordFile = Path.of(dataDir.getPath(), fileName).toFile();
         PrintStream recordWriter = null;
         try {
             recordWriter = new PrintStream(recordFile, Charset.forName("UTF-8"));
-            for (int index = 0; index < recordList.size(); index++) {
-                recordWriter.println(recordList.get(index).getStringRepersentation());
+            for (R r : recordCollection) {
+                recordWriter.println(r.getStringRepersentation());
             }
         } catch (IOException e) {
             e.printStackTrace();

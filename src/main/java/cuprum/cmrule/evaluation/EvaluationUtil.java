@@ -44,7 +44,7 @@ public class EvaluationUtil {
         return Path.of(resultFolder.toString(), fileName);
     }
 
-    public static <R extends ECARecord> Map<String, List<R>> parseDataRecord(
+    public static <R extends ECARecord<R>> Map<String, List<R>> parseDataRecord(
             Path dataDirectory,
             Function<String, R> parseMethod) {
         File dataFolder = dataDirectory.toFile();

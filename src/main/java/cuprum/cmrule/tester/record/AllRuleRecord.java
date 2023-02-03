@@ -2,7 +2,7 @@ package cuprum.cmrule.tester.record;
 
 import cuprum.cmrule.RuleUtil;
 
-public class AllRuleRecord implements ECARecord, Comparable<AllRuleRecord> {
+public class AllRuleRecord implements ECARecord<AllRuleRecord> {
     private Integer rulePattern;
     private Integer step;
 

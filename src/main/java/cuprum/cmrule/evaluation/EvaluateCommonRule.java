@@ -44,8 +44,7 @@ public class EvaluateCommonRule {
 
                 Integer putResult = stepMap.put(record.getQuiverName(), record.getStep());
                 if (putResult != null)
-                    System.err.print("");
-                // System.err.println("Duplicated key.");
+                    System.err.println("Duplicated key.");
             }
         }
 

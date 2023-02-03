@@ -2,7 +2,7 @@ package cuprum.cmrule.tester.record;
 
 import cuprum.cmrule.RuleUtil;
 
-public class AllConditionRecord implements ECARecord, Comparable<AllConditionRecord> {
+public class AllConditionRecord implements ECARecord<AllConditionRecord> {
     private String quiverName;
     private Integer rulePattern;
     private Integer step;

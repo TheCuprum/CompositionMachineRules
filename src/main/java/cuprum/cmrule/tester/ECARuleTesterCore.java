@@ -2,6 +2,7 @@ package cuprum.cmrule.tester;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import compositionmachine.machine.CompositionMachine;
 import compositionmachine.machine.ConnectedQuiver;
@@ -15,23 +16,23 @@ import cuprum.cmrule.tester.record.ECARecord;
 import cuprum.cmrule.tester.record.RecordProviderArgs;
 
 public class ECARuleTesterCore {
-    // public static <R extends ECARecord> List<R> runAllMatches(
+    // public static <R extends ECARecord> Set<R> runAllMatches(
     //         QuiverInitializer<ConnectedQuiver> targetQInit, QuiverInitializer<ConnectedQuiver> startQInit,
     //         HaltPredicate predicate, MachineCallback[] callbacks, int steps,
-    //         Function<RecordProviderArgs, R> recordProvider, List<R> recordStorage,
+    //         Function<RecordProviderArgs, R> recordProvider, Set<R> recordStorage,
     //         boolean onlyFindOneQuiver, boolean onlyFindOneRule) {
     //     do {
-    //         List<R> ruleRecord = runAllConditions(startQInit, predicate, callbacks, steps, recordProvider,
+    //         Set<R> ruleRecord = runAllConditions(startQInit, predicate, callbacks, steps, recordProvider,
     //                 recordStorage, onlyFindOneQuiver, onlyFindOneRule);
     //         recordStorage.addAll(ruleRecord);
     //     } while (targetQInit.iterate());
     //     return recordStorage;
     // }
 
-    public static <R extends ECARecord> List<R> runAllConditions(
+    public static <R extends ECARecord<R>> Set<R> runAllConditions(
             QuiverInitializer<ConnectedQuiver> qInit, HaltPredicate predicate,
             MachineCallback[] callbacks, int steps,
-            Function<RecordProviderArgs, R> recordProvider, List<R> recordStorage,
+            Function<RecordProviderArgs, R> recordProvider, Set<R> recordStorage,
             boolean onlyFindOneQuiver, boolean onlyFindOneRule) {
         do {
             List<R> ruleRecord = runAllRulesSimple(qInit, predicate, callbacks, steps, recordProvider, onlyFindOneRule);
@@ -42,7 +43,7 @@ public class ECARuleTesterCore {
         return recordStorage;
     }
 
-    public static <R extends ECARecord> List<R> runAllRules(
+    public static <R extends ECARecord<R>> List<R> runAllRules(
             QuiverInitializer<ConnectedQuiver> qInit, HaltPredicate predicate,
             MachineCallback[] callbacks, int steps,
             Function<RecordProviderArgs, R> recordProvider, boolean onlyFindOne) {
@@ -71,7 +72,7 @@ public class ECARuleTesterCore {
         return ruleRecord;
     }
 
-    public static <R extends ECARecord> List<R> runAllRulesSimple(
+    public static <R extends ECARecord<R>> List<R> runAllRulesSimple(
             QuiverInitializer<ConnectedQuiver> qInit, HaltPredicate predicate,
             MachineCallback[] callbacks, int steps,
             Function<RecordProviderArgs, R> recordProvider, boolean onlyFindOne) {

@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -45,7 +47,7 @@ public class ECARuleTester {
             String dataDirectory, String fileNamePostfix, int maxSteps,
             int concurrentSize, int monitorMilliInterval) {
 
-        BlockingQueue<Runnable> taskQueue =  new LinkedBlockingQueue<>();
+        BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
                 concurrentSize, concurrentSize, 5, TimeUnit.SECONDS, taskQueue);
 
@@ -55,7 +57,9 @@ public class ECARuleTester {
                 MatchQuiverCallback<ConnectedQuiver> callback = new MatchQuiverCallback<>(targetQuiver);
                 MatchOrSimpHaltPredicate<ConnectedQuiver> predicate = new MatchOrSimpHaltPredicate<>(targetQuiver);
 
-                List<AllConditionRecord> record = Collections.synchronizedList(new ArrayList<>());
+                // List<AllConditionRecord> record = Collections.synchronizedList(new
+                // ArrayList<>());
+                Set<AllConditionRecord> record = Collections.synchronizedSet(new TreeSet<>());
                 List<OneDimensionalQuiverInitializer> SubQInitList = startQInit.split(concurrentSize);
                 CountDownLatch latch = new CountDownLatch(SubQInitList.size());
 
@@ -63,10 +67,10 @@ public class ECARuleTester {
                 Thread recordCollectThread = new Thread(() -> {
                     try {
                         latch.await();
-                        record.sort((AllConditionRecord o1, AllConditionRecord o2) -> {
-                            return o1.compareTo(o2);
-                        });
-                        TesterUtil.writeRecordListToFile(record,
+                        // record.sort((AllConditionRecord o1, AllConditionRecord o2) -> {
+                        //     return o1.compareTo(o2);
+                        // });
+                        TesterUtil.writeRecordsToFile(record,
                                 Path.of(Setting.DATA_PATH, dataDirectory).toString(),
                                 qInitName + "_" + fileNamePostfix);
                     } catch (InterruptedException e) {
@@ -89,7 +93,7 @@ public class ECARuleTester {
                     });
                 }
 
-                while (taskQueue.size() >= concurrentSize){
+                while (taskQueue.size() >= concurrentSize) {
                     try {
                         Thread.sleep(CHECK_POOL_MILLI);
                     } catch (InterruptedException e) {
@@ -127,7 +131,9 @@ public class ECARuleTester {
         }
         System.out.println();
 
-        List<AllConditionRecord> record = Collections.synchronizedList(new ArrayList<>());
+        // List<AllConditionRecord> record = Collections.synchronizedList(new
+        // ArrayList<>());
+        Set<AllConditionRecord> record = Collections.synchronizedSet(new TreeSet<>());
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
                 concurrentSize, concurrentSize, 5, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
@@ -148,10 +154,10 @@ public class ECARuleTester {
             // try {
             executor.shutdown();
             // executor.wait(60 * 1000);
-            record.sort((AllConditionRecord o1, AllConditionRecord o2) -> {
-                return o1.compareTo(o2);
-            });
-            TesterUtil.writeRecordListToFile(record, fileName);
+            // record.sort((AllConditionRecord o1, AllConditionRecord o2) -> {
+            //     return o1.compareTo(o2);
+            // });
+            TesterUtil.writeRecordsToFile(record, fileName);
             // } catch (InterruptedException ie) {
             // System.out.println("Write interrupted, there's no record written to the file
             // \"" + fileName + "\"");
@@ -164,7 +170,9 @@ public class ECARuleTester {
 
     public static void testAllConditions(OneDimensionalQuiverInitializer qInit, HaltPredicate predicate,
             MachineCallback[] callbacks, String fileName, int maxSteps, Predicate<Object[]> acceptPredicate) {
-        List<AllConditionRecord> conditionRecord = Collections.synchronizedList(new ArrayList<>());
+        // List<AllConditionRecord> conditionRecord = Collections.synchronizedList(new
+        // ArrayList<>());
+        Set<AllConditionRecord> conditionRecord = Collections.synchronizedSet(new TreeSet<>());
 
         List<OneDimensionalQuiverInitializer> qInitList = new ArrayList<>();
         qInitList.add(qInit);
@@ -179,7 +187,7 @@ public class ECARuleTester {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println();
             System.out.println("Writing records...");
-            TesterUtil.writeRecordListToFile(conditionRecord, fileName);
+            TesterUtil.writeRecordsToFile(conditionRecord, fileName);
         }));
 
         taskThread.start();
@@ -227,7 +235,7 @@ public class ECARuleTester {
                 }, false);
 
         System.out.println("Writing records...");
-        TesterUtil.writeRecordListToFile(ruleRecord, fileName);
+        TesterUtil.writeRecordsToFile(ruleRecord, fileName);
         // TesterUtil.writeRuleListToFile(ruleRecord, fileName);
     }
 
