@@ -1,5 +1,7 @@
 package cuprum.cmrule.tester.record;
 
+import cuprum.cmrule.RuleUtil;
+
 public class AllConditionRecord implements ECARecord, Comparable<AllConditionRecord> {
     private String quiverName;
     private Integer rulePattern;
@@ -47,5 +49,26 @@ public class AllConditionRecord implements ECARecord, Comparable<AllConditionRec
 
     public Integer getStep() {
         return step;
+    }
+
+    public static AllConditionRecord parse(String str) {
+        String[] fieldSegment = str.split(",", 3);
+
+        if (fieldSegment.length < 3)
+            throw new IllegalArgumentException();
+
+        String[] ruleSegment = fieldSegment[1].split("-", 4);
+
+        if (ruleSegment.length < 4)
+            throw new IllegalArgumentException();
+
+        return new AllConditionRecord(
+                fieldSegment[0],
+                RuleUtil.combineECARulePattern(
+                        Integer.parseInt(ruleSegment[0]),
+                        Integer.parseInt(ruleSegment[1]),
+                        Integer.parseInt(ruleSegment[2]),
+                        Integer.parseInt(ruleSegment[3])),
+                Integer.parseInt(fieldSegment[2]));
     }
 }

@@ -9,6 +9,10 @@ public class Tuple<A, B> {
         this.itemB = itemB;
     }
 
+    public static <A, B> Tuple<A,B> valueOf(A itemA, B itemB){
+        return new Tuple<A,B>(itemA, itemB);
+    }
+
     public A getItemA() {
         return this.itemA;
     }
@@ -41,5 +45,10 @@ public class Tuple<A, B> {
         Tuple<?, ?> other = (Tuple<?, ?>) obj;
 
         return this.itemA.equals(other.getItemA()) && this.itemB.equals(other.getItemB());
+    }
+
+    @Override
+    public String toString() {
+        return "(" + itemA.toString() + "," + itemB.toString() + ")";
     }
 }

@@ -68,7 +68,7 @@ public class TesterUtil {
         File recordFile = Path.of(dataDir.getPath(), fileName).toFile();
         PrintStream recordWriter = null;
         try {
-            recordWriter = new PrintStream(recordFile, Charset.forName("UTF8"));
+            recordWriter = new PrintStream(recordFile, Charset.forName("UTF-8"));
             for (int index = 0; index < recordList.size(); index++) {
                 recordWriter.println(recordList.get(index).getStringRepersentation());
             }
@@ -88,7 +88,7 @@ public class TesterUtil {
         File recordFile = Path.of(Setting.DATA_PATH, fileName).toFile();
         PrintStream recordWriter = null;
         try {
-            recordWriter = new PrintStream(recordFile, Charset.forName("UTF8"));
+            recordWriter = new PrintStream(recordFile, Charset.forName("UTF-8"));
             for (int index = 0; index < len; index++) {
                 String statePattern = stateList.get(index);
                 int rulePattern = ruleList.get(index);
@@ -116,7 +116,7 @@ public class TesterUtil {
         File recordFile = Path.of(Setting.DATA_PATH, fileName).toFile();
         PrintStream recordWriter = null;
         try {
-            recordWriter = new PrintStream(recordFile, Charset.forName("UTF8"));
+            recordWriter = new PrintStream(recordFile, Charset.forName("UTF-8"));
             for (int rulePattern : ruleList) {
                 int d1 = (rulePattern >> 16) & 0x03;
                 int d2 = (rulePattern >> 12) & 0x0F;
