@@ -83,4 +83,47 @@ public class AllMatchRecord implements ECARecord<AllMatchRecord> {
                         Integer.parseInt(ruleSegment[3])),
                 Integer.parseInt(fieldSegment[3]));
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((targetQuiverName == null) ? 0 : targetQuiverName.hashCode());
+        result = prime * result + ((startQuiverName == null) ? 0 : startQuiverName.hashCode());
+        result = prime * result + ((rulePattern == null) ? 0 : rulePattern.hashCode());
+        result = prime * result + ((step == null) ? 0 : step.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AllMatchRecord other = (AllMatchRecord) obj;
+        if (targetQuiverName == null) {
+            if (other.targetQuiverName != null)
+                return false;
+        } else if (!targetQuiverName.equals(other.targetQuiverName))
+            return false;
+        if (startQuiverName == null) {
+            if (other.startQuiverName != null)
+                return false;
+        } else if (!startQuiverName.equals(other.startQuiverName))
+            return false;
+        if (rulePattern == null) {
+            if (other.rulePattern != null)
+                return false;
+        } else if (!rulePattern.equals(other.rulePattern))
+            return false;
+        if (step == null) {
+            if (other.step != null)
+                return false;
+        } else if (!step.equals(other.step))
+            return false;
+        return true;
+    }
 }

@@ -60,6 +60,8 @@ public class EvaluatePerformance {
                     continue;
 
                 Integer recordStep = record.getStep();
+                if (recordStep.compareTo(0) == 0)
+                    continue;
 
                 if (maxStep.compareTo(record.getStep()) < 0)
                     maxStep = recordStep;
@@ -77,6 +79,9 @@ public class EvaluatePerformance {
                     (AllConditionRecord r1, AllConditionRecord r2) -> r1.compareTo(r2));
 
             for (AllConditionRecord record : recordList) {
+                if (record.getQuiverName().equals(dataEntry.getKey()) || record.getStep().compareTo(0) == 0)
+                    continue;
+                    
                 if (maxStep.equals(record.getStep()))
                     maxStepConditionSet.add(record);
                 if (minStep.equals(record.getStep()))
@@ -115,6 +120,8 @@ public class EvaluatePerformance {
 
         Path resultOutputPath = EvaluationUtil.getEvaluationFile(targetPath, "performance.json");
         Path resultBriefOutputPath = EvaluationUtil.getEvaluationFile(targetPath, "performance_brief.json");
+        System.out.println(resultOutputPath);
+        System.out.println(resultBriefOutputPath);
         EvaluationUtil.writeJSON(resultOutputPath, evaluationResult);
         EvaluationUtil.writeJSON(resultBriefOutputPath, evaluationResultBrief);
     }

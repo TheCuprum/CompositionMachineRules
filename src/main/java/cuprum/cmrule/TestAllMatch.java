@@ -17,13 +17,16 @@ public class TestAllMatch {
     }
 
     public static void main(String[] args) {
-        final int patternLength = 5;
-
+        int patternLength = 5;
         int concurrentSize;
-        if (args.length == 1) {
-            concurrentSize = Integer.parseInt(args[0]);
+
+        if (args.length == 2) {
+            patternLength = Integer.parseInt(args[0]);
+            concurrentSize = Integer.parseInt(args[1]);
         } else {
             Scanner sc = new Scanner(System.in);
+            System.out.println("Pattern Length:");
+            patternLength = sc.nextInt();
             System.out.println("Max threads to run tasks:");
             concurrentSize = sc.nextInt();
             sc.close();

@@ -71,4 +71,41 @@ public class AllConditionRecord implements ECARecord<AllConditionRecord> {
                         Integer.parseInt(ruleSegment[3])),
                 Integer.parseInt(fieldSegment[2]));
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((quiverName == null) ? 0 : quiverName.hashCode());
+        result = prime * result + ((rulePattern == null) ? 0 : rulePattern.hashCode());
+        result = prime * result + ((step == null) ? 0 : step.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AllConditionRecord other = (AllConditionRecord) obj;
+        if (quiverName == null) {
+            if (other.quiverName != null)
+                return false;
+        } else if (!quiverName.equals(other.quiverName))
+            return false;
+        if (rulePattern == null) {
+            if (other.rulePattern != null)
+                return false;
+        } else if (!rulePattern.equals(other.rulePattern))
+            return false;
+        if (step == null) {
+            if (other.step != null)
+                return false;
+        } else if (!step.equals(other.step))
+            return false;
+        return true;
+    }
 }
