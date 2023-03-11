@@ -39,21 +39,13 @@ public class TestAllConditionConcurrent {
     }
 
     public static void main(String[] args) {
-        String matchQuiverPattern;
-        String startQuiverPattern;
-        if (args.length == 2) {
-            matchQuiverPattern = args[0];
-            startQuiverPattern = args[1];
-        } else {
-            Scanner sc = new Scanner(System.in);
-            System.out.println("Enter quiver pattern to match:");
-            matchQuiverPattern = sc.nextLine();
-            System.out.println("Enter initial quiver pattern:");
-            startQuiverPattern = sc.nextLine();
-            if (startQuiverPattern.equals("-"))
-                startQuiverPattern = "0".repeat(matchQuiverPattern.length());
-            sc.close();
-        }
+        ProgramArgumentProcessor argProcessor = new ProgramArgumentProcessor();
+        ProgramArgument parsedArgs = argProcessor.addTargetPattern().addInitialPattern().handleArgument(args);
+
+        String matchQuiverPattern = parsedArgs.getTargetPattern();
+        String startQuiverPattern = parsedArgs.getInitialPattern();
+        if (startQuiverPattern.equals("-"))
+            startQuiverPattern = "0".repeat(matchQuiverPattern.length());
 
         if (startQuiverPattern.length() != matchQuiverPattern.length())
             throw new IllegalArgumentException("The quiver patterns must match.");

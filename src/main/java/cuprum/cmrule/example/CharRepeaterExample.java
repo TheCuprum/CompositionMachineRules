@@ -22,7 +22,7 @@ public class CharRepeaterExample extends ExampleGeneration {
                 o -> {
                     long num = (Long) o;
                     Integer intPart = (int) (num & 0xFFFFFFFF);
-                    Character charPart = (char) ((num >> 32) & 0x00FF);
+                    Character charPart = (char) ((num >> 32) & 0x007F);
                     return new Tuple<Integer, Character>(intPart, charPart);
                 });
         tupleIntCharToString = new GeneralFunction(Tuple.class, String.class,

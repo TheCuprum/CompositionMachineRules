@@ -17,20 +17,14 @@ public class TestAllMatch {
     }
 
     public static void main(String[] args) {
-        int patternLength = 5;
-        int concurrentSize;
+        ProgramArgumentProcessor argProcessor = new ProgramArgumentProcessor();
+        ProgramArgument parsedArgs = argProcessor
+                .addExtraIntegerFields("pattern_length", "Pattern Length:")
+                .addExtraIntegerFields("thread_count", "Max threads to run tasks:")
+                .handleArgument(args);
 
-        if (args.length == 2) {
-            patternLength = Integer.parseInt(args[0]);
-            concurrentSize = Integer.parseInt(args[1]);
-        } else {
-            Scanner sc = new Scanner(System.in);
-            System.out.println("Pattern Length:");
-            patternLength = sc.nextInt();
-            System.out.println("Max threads to run tasks:");
-            concurrentSize = sc.nextInt();
-            sc.close();
-        }
+        int patternLength = parsedArgs.getExtraIntegerFields("pattern_length");
+        int concurrentSize = parsedArgs.getExtraIntegerFields("thread_count");
 
         // OneDimensionalQuiverInitializer targetQInit = provideInitializer();
         OneDimensionalQuiverInitializer targetQInit = new OneDimensionalQuiverInitializer("0".repeat(patternLength));

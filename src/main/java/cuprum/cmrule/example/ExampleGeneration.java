@@ -7,6 +7,8 @@ import compositionmachine.machine.CompositionMachine;
 import compositionmachine.machine.ConnectedQuiver;
 import compositionmachine.machine.Quiver;
 import compositionmachine.machine.predicates.NullPredicate;
+import cuprum.cmrule.ProgramArgument;
+import cuprum.cmrule.ProgramArgumentProcessor;
 import cuprum.cmrule.application.GeneralFunction;
 import cuprum.cmrule.application.OneDimFunctionMapper;
 import cuprum.cmrule.impl.OneDimensionalQuiverInitializer;
@@ -14,29 +16,15 @@ import cuprum.cmrule.rules.ECARule;
 
 public abstract class ExampleGeneration {
     private Object[] handleArgs(String[] args) {
-        String initialQuiverPattern;
-        int[] ruleNumber = new int[4];
-        int steps;
-        if (args.length == 6) {
-            initialQuiverPattern = args[0];
-            ruleNumber[0] = Integer.parseInt(args[1]);
-            ruleNumber[1] = Integer.parseInt(args[2]);
-            ruleNumber[2] = Integer.parseInt(args[3]);
-            ruleNumber[3] = Integer.parseInt(args[4]);
-            steps = Integer.parseInt(args[5]);
-        } else {
-            Scanner sc = new Scanner(System.in);
-            System.out.println("Enter quiver pattern:");
-            initialQuiverPattern = sc.nextLine();
-            System.out.println("Enter the rules (d1, d2, d3, d4):");
-            ruleNumber[0] = sc.nextInt();
-            ruleNumber[1] = sc.nextInt();
-            ruleNumber[2] = sc.nextInt();
-            ruleNumber[3] = sc.nextInt();
-            System.out.println("Enter iteration steps:");
-            steps = sc.nextInt();
-            sc.close();
-        }
+        ProgramArgumentProcessor argProcessor = new ProgramArgumentProcessor();
+        ProgramArgument parsedArgs = argProcessor     
+            .addInitialPattern().addRule()
+            .addExtraIntegerFields("step", "Enter iteration steps:")
+            .handleArgument(args);
+
+        String initialQuiverPattern = parsedArgs.getInitialPattern();
+        int[] ruleNumber = parsedArgs.getRulePattern();
+        int steps = parsedArgs.getExtraIntegerFields("step");
 
         return new Object[] { initialQuiverPattern, ruleNumber, steps };
     }
@@ -52,7 +40,7 @@ public abstract class ExampleGeneration {
         return machine.getQuiverHistory().get(steps);
     }
 
-    public void runGeneration(String[] args) {
+    public GeneralFunction[] runGeneration(String[] args) {
         Object[] parsedArgs = this.handleArgs(args);
         String initialQuiverPattern = (String) parsedArgs[0];
         int[] ruleNumber = (int[]) parsedArgs[1];
@@ -80,7 +68,11 @@ public abstract class ExampleGeneration {
                 System.out.println("Test input: " + input.toString());
                 System.out.println("Output: " + output.toString());
             }
+
+            return outFunctions;
         }
+
+        return null;
     }
 
     protected abstract GeneralFunction[] provideFunctions();
