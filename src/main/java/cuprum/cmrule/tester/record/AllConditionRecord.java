@@ -101,11 +101,11 @@ public class AllConditionRecord implements ECARecord<AllConditionRecord> {
                 return false;
         } else if (!rulePattern.equals(other.rulePattern))
             return false;
-        if (step == null) {
-            if (other.step != null)
-                return false;
-        } else if (!step.equals(other.step))
-            return false;
+        // if (step == null) {
+        //     if (other.step != null)
+        //         return false;
+        // } else if (!step.equals(other.step))
+        //     return false;
         return true;
     }
 }

@@ -42,6 +42,6 @@ public class TestAllCondition {
                         return true;
                     else
                         return false;
-                });
+                }, true);
     }
 }

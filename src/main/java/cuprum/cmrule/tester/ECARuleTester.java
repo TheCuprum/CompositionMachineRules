@@ -3,9 +3,13 @@ package cuprum.cmrule.tester;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -15,12 +19,15 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import compositionmachine.bootstrap.Config;
+import compositionmachine.machine.Arrow;
 import compositionmachine.machine.ConnectedQuiver;
 import compositionmachine.machine.Quiver;
 import compositionmachine.machine.callbacks.SaveDotCallback;
+import compositionmachine.machine.interfaces.BaseConnectedQuiver;
 import compositionmachine.machine.interfaces.HaltPredicate;
 import compositionmachine.machine.interfaces.MachineCallback;
 import compositionmachine.machine.interfaces.QuiverInitializer;
+import compositionmachine.machine.predicates.LoopPredicate;
 import cuprum.cmrule.Setting;
 import cuprum.cmrule.impl.DetectEdgeCallback;
 import cuprum.cmrule.impl.HaltRecordCallback;
@@ -41,11 +48,124 @@ import cuprum.cmrule.tester.record.RecordProviderArgs;
 public class ECARuleTester {
     public static final int STEPS = 500;
     public static final int CHECK_POOL_MILLI = 10000;
+    public static final int CHECK_POOL_MILLI_SHORT = 1000;
+
+    /**
+     * Do not call this method unless you know it is a real instance of
+     * ConnectedQuiver.
+     * 
+     * @param <CQ>
+     * @param quiver
+     * @return
+     */
+    public static <CQ extends BaseConnectedQuiver<CQ>> String connectedQuiverToString(Quiver<CQ> quiver) {
+        StringBuilder sb = new StringBuilder();
+        for (int index = 0; index < quiver.size(); index++) {
+            if (index > 0)
+                sb.append(',');
+            BaseConnectedQuiver<CQ> cq = quiver.get(index);
+            Iterator<Arrow> arrIter = cq.getArrowIterator();
+            while (arrIter.hasNext()) {
+                Arrow arrow = arrIter.next();
+                sb.append(cq.getArrowState(arrow) > 0 ? '1' : '0');
+            }
+        }
+        return sb.toString();
+    }
+
+    public static void categorizeAllMatchesConcurrent(
+            OneDimensionalQuiverInitializer startQInit,
+            String dataDirectory, String fileNamePostfix, int maxSteps,
+            int concurrentSize, int monitorMilliInterval, boolean writeResult) {
+        BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+                concurrentSize, concurrentSize, 5, TimeUnit.SECONDS, taskQueue);
+
+        LoopPredicate predicate = new LoopPredicate();
+        Map<String, Set<AllConditionRecord>> recordSetMap = Collections.synchronizedMap(new TreeMap<>());
+        List<OneDimensionalQuiverInitializer> subQInitList = startQInit.split(concurrentSize);
+
+        for (OneDimensionalQuiverInitializer subQInit : subQInitList)
+            System.out.println(subQInit.getName());
+
+        if (writeResult) {
+            Thread recordCollectThreadMain;
+            Runtime.getRuntime().addShutdownHook(recordCollectThreadMain = new Thread(() -> {
+                System.out.println("Shutting down...");
+                try {
+                    executor.shutdown();
+                    executor.awaitTermination(10, TimeUnit.MINUTES);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                for (Entry<String, Set<AllConditionRecord>> entry : recordSetMap.entrySet()) {
+                    TesterUtil.writeRecordsToFile(entry.getValue(),
+                            Path.of(Setting.DATA_PATH, dataDirectory).toString(),
+                            entry.getKey() + "_" + fileNamePostfix);
+                }
+            }, "Record Collect Thread-Main"));
+        }
+
+        Thread taskSubmitThread = new Thread(() -> {
+            for (OneDimensionalQuiverInitializer subQInit : subQInitList) {
+                executor.execute(() -> {
+                    while (subQInit.isAvailable()) {
+                        String startQuiverName = subQInit.getName();
+                        ECARuleTesterCore.runAllRulesSimple(
+                                subQInit, predicate, new MachineCallback[0], maxSteps,
+                                (RecordProviderArgs args) -> {
+                                    Map<Integer, Quiver<ConnectedQuiver>> history = args.getMachine()
+                                            .getQuiverHistory();
+                                    for (int step = 1; step < history.size(); step++) {
+                                        String statePattern = ECARuleTester.connectedQuiverToString(history.get(step));
+                                        synchronized (recordSetMap) {
+                                            Set<AllConditionRecord> recordSet = recordSetMap.get(statePattern);
+                                            if (recordSet == null) {
+                                                recordSet = Collections.synchronizedSet(new TreeSet<>());
+                                                recordSetMap.put(statePattern, recordSet);
+                                            }
+                                            recordSet.add(new AllConditionRecord(
+                                                    startQuiverName, args.getRulePattern(), step));
+                                        }
+                                    }
+                                    return null;
+                                }, false);
+                        subQInit.iterate();
+                    }
+                });
+
+                while (taskQueue.size() > concurrentSize / 2) {
+                    try {
+                        Thread.sleep(CHECK_POOL_MILLI_SHORT);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            executor.shutdown();
+        }, "Task Submit Thread");
+        taskSubmitThread.start();
+
+        Thread monitorThread = new Thread(() -> {
+            // List<OneDimensionalQuiverInitializer> qList = new ArrayList<>();
+            // qList.add(startQInit);
+            // TestMonitor taskMonitor = new TestMonitor(qList);
+            TestMonitor taskMonitor = new TestMonitor(subQInitList);
+            taskMonitor.monitor(monitorMilliInterval);
+        }, "Task Monitor Thread");
+        monitorThread.run();
+
+        try {
+            executor.awaitTermination(10, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void testAllMatchesConcurrent(
             OneDimensionalQuiverInitializer targetQInit, OneDimensionalQuiverInitializer startQInit,
             String dataDirectory, String fileNamePostfix, int maxSteps,
-            int concurrentSize, int monitorMilliInterval) {
+            int concurrentSize, int monitorMilliInterval, boolean writeResult) {
 
         BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
         ThreadPoolExecutor executor = new ThreadPoolExecutor(
@@ -64,20 +184,22 @@ public class ECARuleTester {
                 CountDownLatch latch = new CountDownLatch(SubQInitList.size());
 
                 String qInitName = targetQInit.getName();
-                Thread recordCollectThread = new Thread(() -> {
-                    try {
-                        latch.await();
-                        // record.sort((AllConditionRecord o1, AllConditionRecord o2) -> {
-                        //     return o1.compareTo(o2);
-                        // });
-                        TesterUtil.writeRecordsToFile(record,
-                                Path.of(Setting.DATA_PATH, dataDirectory).toString(),
-                                qInitName + "_" + fileNamePostfix);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }, "Record Collect Thread-" + qInitName);
-                recordCollectThread.start();
+                if (writeResult) {
+                    Thread recordCollectThread = new Thread(() -> {
+                        try {
+                            latch.await();
+                            // record.sort((AllConditionRecord o1, AllConditionRecord o2) -> {
+                            // return o1.compareTo(o2);
+                            // });
+                            TesterUtil.writeRecordsToFile(record,
+                                    Path.of(Setting.DATA_PATH, dataDirectory).toString(),
+                                    qInitName + "_" + fileNamePostfix);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }, "Record Collect Thread-" + qInitName);
+                    recordCollectThread.start();
+                }
 
                 for (OneDimensionalQuiverInitializer subQInit : SubQInitList) {
                     executor.execute(() -> {
@@ -124,7 +246,7 @@ public class ECARuleTester {
 
     public static void testAllConditionsConcurrent(OneDimensionalQuiverInitializer qInit, HaltPredicate predicate,
             MachineCallback[] callbacks, String fileName, int maxSteps, Predicate<Object[]> acceptPredicate,
-            int concurrentSize) {
+            int concurrentSize, boolean writeResult) {
         List<OneDimensionalQuiverInitializer> SubQInitList = qInit.split(concurrentSize);
         for (int index = 0; index < SubQInitList.size(); index++) {
             System.out.println("Start Position-" + index + ": " + SubQInitList.get(index).getName());
@@ -148,28 +270,31 @@ public class ECARuleTester {
         });
         taskSubmitThread.start();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println();
-            System.out.println("Writing records...");
-            // try {
-            executor.shutdown();
-            // executor.wait(60 * 1000);
-            // record.sort((AllConditionRecord o1, AllConditionRecord o2) -> {
-            //     return o1.compareTo(o2);
-            // });
-            TesterUtil.writeRecordsToFile(record, fileName);
-            // } catch (InterruptedException ie) {
-            // System.out.println("Write interrupted, there's no record written to the file
-            // \"" + fileName + "\"");
-            // }
-        }));
+        if (writeResult) {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println();
+                System.out.println("Writing records...");
+                // try {
+                executor.shutdown();
+                // executor.wait(60 * 1000);
+                // record.sort((AllConditionRecord o1, AllConditionRecord o2) -> {
+                // return o1.compareTo(o2);
+                // });
+                TesterUtil.writeRecordsToFile(record, fileName);
+                // } catch (InterruptedException ie) {
+                // System.out.println("Write interrupted, there's no record written to the file
+                // \"" + fileName + "\"");
+                // }
+            }));
+        }
 
         TestMonitor taskMonitor = new TestMonitor(SubQInitList);
         taskMonitor.monitor(2000);
     }
 
     public static void testAllConditions(OneDimensionalQuiverInitializer qInit, HaltPredicate predicate,
-            MachineCallback[] callbacks, String fileName, int maxSteps, Predicate<Object[]> acceptPredicate) {
+            MachineCallback[] callbacks, String fileName, int maxSteps, Predicate<Object[]> acceptPredicate,
+            boolean writeResult) {
         // List<AllConditionRecord> conditionRecord = Collections.synchronizedList(new
         // ArrayList<>());
         Set<AllConditionRecord> conditionRecord = Collections.synchronizedSet(new TreeSet<>());
@@ -184,11 +309,13 @@ public class ECARuleTester {
                     false, false);
         });
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println();
-            System.out.println("Writing records...");
-            TesterUtil.writeRecordsToFile(conditionRecord, fileName);
-        }));
+        if (writeResult) {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                System.out.println();
+                System.out.println("Writing records...");
+                TesterUtil.writeRecordsToFile(conditionRecord, fileName);
+            }));
+        }
 
         taskThread.start();
         taskMonitor.monitor(5000);

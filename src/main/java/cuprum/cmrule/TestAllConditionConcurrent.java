@@ -33,7 +33,7 @@ public class TestAllConditionConcurrent {
                     else
                         return false;
                 },
-                concurrentSize);
+                concurrentSize, true);
 
         System.exit(0);
     }

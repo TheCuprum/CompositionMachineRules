@@ -1,7 +1,5 @@
 package cuprum.cmrule;
 
-import java.util.Scanner;
-
 import cuprum.cmrule.impl.List1DQuiverInitializer;
 import cuprum.cmrule.impl.OneDimensionalQuiverInitializer;
 import cuprum.cmrule.tester.ECARuleTester;
@@ -32,7 +30,9 @@ public class TestAllMatch {
 
         TesterUtil.addTimer();
 
-        ECARuleTester.testAllMatchesConcurrent(targetQInit, startQInit, "len=" + patternLength, Setting.ALL_MATCH_RECORD_FILE, 1000,
-                concurrentSize, 5000);
+        // ECARuleTester.testAllMatchesConcurrent(targetQInit, startQInit, "len=" + patternLength, Setting.ALL_MATCH_RECORD_FILE, 1000,
+        //         concurrentSize, 5000, true);
+        ECARuleTester.categorizeAllMatchesConcurrent(startQInit, "len=" + patternLength, Setting.ALL_MATCH_RECORD_FILE, 1000,
+                concurrentSize, 500, true);
     }
 }
