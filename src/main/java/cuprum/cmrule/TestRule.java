@@ -1,7 +1,5 @@
 package cuprum.cmrule;
 
-import java.util.Scanner;
-
 import compositionmachine.machine.interfaces.HaltPredicate;
 import compositionmachine.machine.predicates.LoopPredicate;
 import cuprum.cmrule.impl.OneDimensionalQuiverInitializer;

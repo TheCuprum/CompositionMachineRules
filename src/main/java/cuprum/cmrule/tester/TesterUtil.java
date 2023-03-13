@@ -9,6 +9,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import compositionmachine.machine.Arrow;
 import compositionmachine.machine.interfaces.BaseConnectedQuiver;
@@ -17,7 +24,7 @@ import cuprum.cmrule.Setting;
 import cuprum.cmrule.tester.record.ECARecord;
 
 public class TesterUtil {
-    public static void addTimer(){
+    public static void addTimer() {
         System.out.println("Start Time: " + (new Date()).toString());
         long startTime = System.currentTimeMillis();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -55,6 +62,31 @@ public class TesterUtil {
                 return 11;
             default:
                 return ruleNumber;
+        }
+    }
+
+    public static <R extends ECARecord<R>> void writeRecordMapConcurrent(int ioThreads, Map<String, Set<R>> recordSetMap,
+            String dataPath, String fileNamePostfix, long checkIntervalMilli) {
+        BlockingQueue<Runnable> ioQueue = new LinkedBlockingQueue<>();
+        ThreadPoolExecutor ioExecutor = new ThreadPoolExecutor(ioThreads, ioThreads, 5, TimeUnit.SECONDS, ioQueue);
+        for (Entry<String, Set<R>> entry : recordSetMap.entrySet()) {
+            ioExecutor.execute(() -> {
+                TesterUtil.writeRecordsToFile(entry.getValue(),
+                        dataPath, entry.getKey() + "_" + fileNamePostfix);
+            });
+            while (ioQueue.size() > ioThreads / 2) {
+                try {
+                    Thread.sleep(checkIntervalMilli);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        try {
+            ioExecutor.shutdown();
+            ioExecutor.awaitTermination(10, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

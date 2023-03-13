@@ -1,11 +1,9 @@
 package cuprum.cmrule;
 
-import java.util.Scanner;
-
 import compositionmachine.machine.ConnectedQuiver;
 import compositionmachine.machine.Quiver;
 import compositionmachine.machine.interfaces.MachineCallback;
-import cuprum.cmrule.impl.MatchOrSimpHaltPredicate;
+import cuprum.cmrule.impl.MatchOrLoopHaltPredicate;
 import cuprum.cmrule.impl.MatchQuiverCallback;
 import cuprum.cmrule.impl.OneDimensionalQuiverInitializer;
 import cuprum.cmrule.tester.ECARuleTester;
@@ -33,7 +31,7 @@ public class TestAllCondition {
         OneDimensionalQuiverInitializer qInit = new OneDimensionalQuiverInitializer(startQuiverPattern);
         // qInit.setTerminateState("0".repeat(startQuiverPattern.length()));
         MatchQuiverCallback<ConnectedQuiver> callback = new MatchQuiverCallback<>(matchQuiver);
-        MatchOrSimpHaltPredicate<ConnectedQuiver> predicate = new MatchOrSimpHaltPredicate<>(matchQuiver);
+        MatchOrLoopHaltPredicate<ConnectedQuiver> predicate = new MatchOrLoopHaltPredicate<>(matchQuiver);
 
         ECARuleTester.testAllConditions(qInit, predicate, new MachineCallback[] { callback },
                 matchQuiverPattern + "_" + Setting.ALL_CONDITION_RECORD_FILE, 1000,

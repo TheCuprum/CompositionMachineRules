@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -31,7 +30,7 @@ import compositionmachine.machine.predicates.LoopPredicate;
 import cuprum.cmrule.Setting;
 import cuprum.cmrule.impl.DetectEdgeCallback;
 import cuprum.cmrule.impl.HaltRecordCallback;
-import cuprum.cmrule.impl.MatchOrSimpHaltPredicate;
+import cuprum.cmrule.impl.MatchOrLoopHaltPredicate;
 import cuprum.cmrule.impl.MatchQuiverCallback;
 import cuprum.cmrule.impl.OneDimensionalQuiverInitializer;
 import cuprum.cmrule.tester.record.AllConditionRecord;
@@ -47,7 +46,7 @@ import cuprum.cmrule.tester.record.RecordProviderArgs;
  */
 public class ECARuleTester {
     public static final int STEPS = 500;
-    public static final int CHECK_POOL_MILLI = 10000;
+    public static final int CHECK_POOL_MILLI = 5000;
     public static final int CHECK_POOL_MILLI_SHORT = 1000;
 
     /**
@@ -76,39 +75,33 @@ public class ECARuleTester {
     public static void categorizeAllMatchesConcurrent(
             OneDimensionalQuiverInitializer startQInit,
             String dataDirectory, String fileNamePostfix, int maxSteps,
-            int concurrentSize, int monitorMilliInterval, boolean writeResult) {
+            int concurrentSize, int ioThreads, int monitorMilliInterval) {
         BlockingQueue<Runnable> taskQueue = new LinkedBlockingQueue<>();
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+        ThreadPoolExecutor taskExecutor = new ThreadPoolExecutor(
                 concurrentSize, concurrentSize, 5, TimeUnit.SECONDS, taskQueue);
 
         LoopPredicate predicate = new LoopPredicate();
         Map<String, Set<AllConditionRecord>> recordSetMap = Collections.synchronizedMap(new TreeMap<>());
         List<OneDimensionalQuiverInitializer> subQInitList = startQInit.split(concurrentSize);
 
-        for (OneDimensionalQuiverInitializer subQInit : subQInitList)
-            System.out.println(subQInit.getName());
-
-        if (writeResult) {
+        if (ioThreads > 0) {
             Thread recordCollectThreadMain;
             Runtime.getRuntime().addShutdownHook(recordCollectThreadMain = new Thread(() -> {
                 System.out.println("Shutting down...");
                 try {
-                    executor.shutdown();
-                    executor.awaitTermination(10, TimeUnit.MINUTES);
+                    taskExecutor.shutdown();
+                    taskExecutor.awaitTermination(10, TimeUnit.MINUTES);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                for (Entry<String, Set<AllConditionRecord>> entry : recordSetMap.entrySet()) {
-                    TesterUtil.writeRecordsToFile(entry.getValue(),
-                            Path.of(Setting.DATA_PATH, dataDirectory).toString(),
-                            entry.getKey() + "_" + fileNamePostfix);
-                }
+                TesterUtil.writeRecordMapConcurrent(ioThreads, recordSetMap,
+                        Path.of(Setting.DATA_PATH, dataDirectory).toString(), fileNamePostfix, CHECK_POOL_MILLI_SHORT);
             }, "Record Collect Thread-Main"));
         }
 
         Thread taskSubmitThread = new Thread(() -> {
             for (OneDimensionalQuiverInitializer subQInit : subQInitList) {
-                executor.execute(() -> {
+                taskExecutor.execute(() -> {
                     while (subQInit.isAvailable()) {
                         String startQuiverName = subQInit.getName();
                         ECARuleTesterCore.runAllRulesSimple(
@@ -136,13 +129,13 @@ public class ECARuleTester {
 
                 while (taskQueue.size() > concurrentSize / 2) {
                     try {
-                        Thread.sleep(CHECK_POOL_MILLI_SHORT);
+                        Thread.sleep(CHECK_POOL_MILLI);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
             }
-            executor.shutdown();
+            taskExecutor.shutdown();
         }, "Task Submit Thread");
         taskSubmitThread.start();
 
@@ -156,7 +149,7 @@ public class ECARuleTester {
         monitorThread.run();
 
         try {
-            executor.awaitTermination(10, TimeUnit.MINUTES);
+            taskExecutor.awaitTermination(10, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -175,10 +168,9 @@ public class ECARuleTester {
             while (targetQInit.isAvailable()) {
                 Quiver<ConnectedQuiver> targetQuiver = targetQInit.generateQuiver();
                 MatchQuiverCallback<ConnectedQuiver> callback = new MatchQuiverCallback<>(targetQuiver);
-                MatchOrSimpHaltPredicate<ConnectedQuiver> predicate = new MatchOrSimpHaltPredicate<>(targetQuiver);
+                MatchOrLoopHaltPredicate<ConnectedQuiver> predicate = new MatchOrLoopHaltPredicate<>(targetQuiver);
 
-                // List<AllConditionRecord> record = Collections.synchronizedList(new
-                // ArrayList<>());
+
                 Set<AllConditionRecord> record = Collections.synchronizedSet(new TreeSet<>());
                 List<OneDimensionalQuiverInitializer> SubQInitList = startQInit.split(concurrentSize);
                 CountDownLatch latch = new CountDownLatch(SubQInitList.size());
@@ -188,9 +180,6 @@ public class ECARuleTester {
                     Thread recordCollectThread = new Thread(() -> {
                         try {
                             latch.await();
-                            // record.sort((AllConditionRecord o1, AllConditionRecord o2) -> {
-                            // return o1.compareTo(o2);
-                            // });
                             TesterUtil.writeRecordsToFile(record,
                                     Path.of(Setting.DATA_PATH, dataDirectory).toString(),
                                     qInitName + "_" + fileNamePostfix);
