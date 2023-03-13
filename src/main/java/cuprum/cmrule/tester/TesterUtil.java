@@ -35,7 +35,7 @@ public class TesterUtil {
             long minute = deltaTime / (1000 * 60) % 60;
             long second = deltaTime / 1000 % 60;
             long milli = deltaTime % 1000;
-            System.out.println(String.format("Total Time: %d:%d:%d:%d.%d", day, hour, minute, second, milli));
+            System.out.println(String.format("\nTotal Time: %d:%d:%d:%d.%d", day, hour, minute, second, milli));
         }));
     }
 

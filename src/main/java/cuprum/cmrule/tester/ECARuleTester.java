@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -46,8 +47,8 @@ import cuprum.cmrule.tester.record.RecordProviderArgs;
  */
 public class ECARuleTester {
     public static final int STEPS = 500;
-    public static final int CHECK_POOL_MILLI = 5000;
-    public static final int CHECK_POOL_MILLI_SHORT = 1000;
+    public static final int CHECK_POOL_MILLI = 500;
+    public static final int CHECK_POOL_MILLI_SHORT = 100;
 
     /**
      * Do not call this method unless you know it is a real instance of
@@ -81,7 +82,8 @@ public class ECARuleTester {
                 concurrentSize, concurrentSize, 5, TimeUnit.SECONDS, taskQueue);
 
         LoopPredicate predicate = new LoopPredicate();
-        Map<String, Set<AllConditionRecord>> recordSetMap = Collections.synchronizedMap(new TreeMap<>());
+        // Map<String, Set<AllConditionRecord>> recordSetMap = Collections.synchronizedMap(new TreeMap<>());
+        Map<String, Set<AllConditionRecord>> recordSetMap = new ConcurrentHashMap<>();
         List<OneDimensionalQuiverInitializer> subQInitList = startQInit.split(concurrentSize);
 
         if (ioThreads > 0) {
@@ -111,15 +113,16 @@ public class ECARuleTester {
                                             .getQuiverHistory();
                                     for (int step = 1; step < history.size(); step++) {
                                         String statePattern = ECARuleTester.connectedQuiverToString(history.get(step));
+                                        Set<AllConditionRecord> recordSet;
                                         synchronized (recordSetMap) {
-                                            Set<AllConditionRecord> recordSet = recordSetMap.get(statePattern);
+                                            recordSet = recordSetMap.get(statePattern);
                                             if (recordSet == null) {
                                                 recordSet = Collections.synchronizedSet(new TreeSet<>());
                                                 recordSetMap.put(statePattern, recordSet);
                                             }
+                                        }
                                             recordSet.add(new AllConditionRecord(
                                                     startQuiverName, args.getRulePattern(), step));
-                                        }
                                     }
                                     return null;
                                 }, false);
@@ -146,7 +149,8 @@ public class ECARuleTester {
             TestMonitor taskMonitor = new TestMonitor(subQInitList);
             taskMonitor.monitor(monitorMilliInterval);
         }, "Task Monitor Thread");
-        monitorThread.run();
+        monitorThread.setDaemon(true);
+        monitorThread.start();
 
         try {
             taskExecutor.awaitTermination(10, TimeUnit.MINUTES);
@@ -223,7 +227,8 @@ public class ECARuleTester {
             TestMonitor taskMonitor = new TestMonitor(qList);
             taskMonitor.monitor(monitorMilliInterval);
         }, "Task Monitor Thread");
-        monitorThread.run();
+        monitorThread.setDaemon(true);
+        monitorThread.start();
 
         try {
             executor.shutdown();
