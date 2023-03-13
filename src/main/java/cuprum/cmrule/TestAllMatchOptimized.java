@@ -22,6 +22,6 @@ public class TestAllMatchOptimized {
         TesterUtil.addTimer();
 
         ECARuleTester.categorizeAllMatchesConcurrent(startQInit, "len=" + patternLength, Setting.ALL_MATCH_RECORD_FILE,
-                1000, concurrentSize, ioThreads, 500);
+                1000, concurrentSize, ioThreads, 5000);
     }
 }
