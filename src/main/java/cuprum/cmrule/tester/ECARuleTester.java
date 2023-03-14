@@ -218,6 +218,7 @@ public class ECARuleTester {
 
                 targetQInit.iterate();
             }
+            executor.shutdown();
         }, "Task Submit Thread");
         taskSubmitThread.start();
 
@@ -231,7 +232,6 @@ public class ECARuleTester {
         monitorThread.start();
 
         try {
-            executor.shutdown();
             executor.awaitTermination(10, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             e.printStackTrace();
