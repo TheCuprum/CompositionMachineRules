@@ -1,8 +1,11 @@
 package cuprum.cmrule.tester;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -65,7 +68,8 @@ public class TesterUtil {
         }
     }
 
-    public static <R extends ECARecord<R>> void writeRecordMapConcurrent(int ioThreads, Map<String, Set<R>> recordSetMap,
+    public static <R extends ECARecord<R>> void writeRecordMapConcurrent(int ioThreads,
+            Map<String, Set<R>> recordSetMap,
             String dataPath, String fileNamePostfix, long checkIntervalMilli) {
         BlockingQueue<Runnable> ioQueue = new LinkedBlockingQueue<>();
         ThreadPoolExecutor ioExecutor = new ThreadPoolExecutor(ioThreads, ioThreads, 5, TimeUnit.SECONDS, ioQueue);
@@ -98,9 +102,9 @@ public class TesterUtil {
             Collection<R> recordCollection, String dataPath, String fileName) {
         File dataDir = FileUtil.createOrChangeDirectory(dataPath);
         File recordFile = Path.of(dataDir.getPath(), fileName).toFile();
-        PrintStream recordWriter = null;
+        PrintWriter recordWriter = null;
         try {
-            recordWriter = new PrintStream(recordFile, Charset.forName("UTF-8"));
+            recordWriter = new PrintWriter(new BufferedWriter(new FileWriter(recordFile, Charset.forName("UTF-8"))));
             for (R r : recordCollection) {
                 recordWriter.println(r.getStringRepersentation());
             }
@@ -118,9 +122,9 @@ public class TesterUtil {
         int len = Math.min(Math.min(stateList.size(), ruleList.size()), stepList.size());
         FileUtil.createOrChangeDirectory(Setting.DATA_PATH);
         File recordFile = Path.of(Setting.DATA_PATH, fileName).toFile();
-        PrintStream recordWriter = null;
+        PrintWriter recordWriter = null;
         try {
-            recordWriter = new PrintStream(recordFile, Charset.forName("UTF-8"));
+            recordWriter = new PrintWriter(new BufferedWriter(new FileWriter(recordFile, Charset.forName("UTF-8"))));
             for (int index = 0; index < len; index++) {
                 String statePattern = stateList.get(index);
                 int rulePattern = ruleList.get(index);
@@ -146,9 +150,9 @@ public class TesterUtil {
     public static void writeRuleListToFile(ArrayList<Integer> ruleList, String fileName) {
         FileUtil.createOrChangeDirectory(Setting.DATA_PATH);
         File recordFile = Path.of(Setting.DATA_PATH, fileName).toFile();
-        PrintStream recordWriter = null;
+        PrintWriter recordWriter = null;
         try {
-            recordWriter = new PrintStream(recordFile, Charset.forName("UTF-8"));
+            recordWriter = new PrintWriter(new BufferedWriter(new FileWriter(recordFile, Charset.forName("UTF-8"))));
             for (int rulePattern : ruleList) {
                 int d1 = (rulePattern >> 16) & 0x03;
                 int d2 = (rulePattern >> 12) & 0x0F;

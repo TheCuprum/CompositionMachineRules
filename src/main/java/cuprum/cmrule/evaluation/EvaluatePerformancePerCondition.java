@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 
 import cuprum.cmrule.tester.record.AllConditionRecord;
 
-public class EvaluatePerformance {
+public class EvaluatePerformancePerCondition {
     static class StepRecord {
         public Set<AllConditionRecord> maxStepConditionSet;
         public Set<AllConditionRecord> minStepConditionSet;
@@ -46,7 +46,7 @@ public class EvaluatePerformance {
     }
 
     private static Map<String, StepRecord> evaluate(Map<String, List<AllConditionRecord>> dataRecordMap) {
-        Map<String, StepRecord> performanceMap = new TreeMap<>((String s1, String s2) -> s1.compareTo(s2));
+        Map<String, StepRecord> perQuiverMap = new TreeMap<>((String s1, String s2) -> s1.compareTo(s2));
 
         for (Entry<String, List<AllConditionRecord>> dataEntry : dataRecordMap.entrySet()) {
             List<AllConditionRecord> recordList = dataEntry.getValue();
@@ -88,10 +88,10 @@ public class EvaluatePerformance {
                     minStepConditionSet.add(record);
             }
 
-            performanceMap.put(dataEntry.getKey(),
+            perQuiverMap.put(dataEntry.getKey(),
                     new StepRecord(maxStepConditionSet, minStepConditionSet, frequencyMap));
         }
-        return performanceMap;
+        return perQuiverMap;
     }
 
     public static void main(String[] args) {
