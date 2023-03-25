@@ -337,7 +337,7 @@ public class ECARuleTester {
     public static void testAllRules(QuiverInitializer<ConnectedQuiver> qInit,
             HaltPredicate predicate, String fileName, int steps) {
         HaltRecordCallback haltCallback = new HaltRecordCallback();
-        List<AllRuleRecord> ruleRecord = ECARuleTesterCore.runAllRules(qInit, predicate,
+        List<AllRuleRecord> ruleRecord = ECARuleTesterCore.runAllRulesSimple(qInit, predicate,
                 new MachineCallback[] {
                         // new PrintBlockCallback(),
                         haltCallback
