@@ -4,11 +4,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.Map.Entry;
-
 import cuprum.cmrule.RuleUtil;
 import cuprum.cmrule.datatype.Tuple;
 import cuprum.cmrule.tester.record.AllConditionRecord;

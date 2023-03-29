@@ -1,7 +1,6 @@
 package cuprum.cmrule.example;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import compositionmachine.machine.CompositionMachine;
 import compositionmachine.machine.ConnectedQuiver;
