@@ -7,12 +7,12 @@ public class ProgramArgument {
     private String targetPattern;
     private String initialPattern;
     private int d1, d2, d3, d4;
-    private Map<String, Integer> extraIntegerFields = new LinkedHashMap<>();
+    private Map<String, String> extraFields = new LinkedHashMap<>();
 
     private boolean targetPatternSwitch = false;
     private boolean initialPatternSwitch = false;
     private boolean ruleSwitch = false;
-    private Map<String, Boolean> extraIntegerFieldSwitches = new LinkedHashMap<>();
+    private Map<String, Boolean> extraFieldSwitches = new LinkedHashMap<>();
 
     public static class FieldNotEnableException extends RuntimeException {
     }
@@ -56,15 +56,22 @@ public class ProgramArgument {
         this.ruleSwitch = true;
     }
 
-    public int getExtraIntegerFields(String key) {
-        if (this.extraIntegerFieldSwitches.get(key).booleanValue()) {
-            return this.extraIntegerFields.get(key).intValue();
+    public String getExtraField(String key) {
+        if (this.extraFieldSwitches.get(key).booleanValue()) {
+            return this.extraFields.get(key);
         }
         throw new FieldNotEnableException();
     }
 
-    public void setExtraIntegerFields(String key, int value) {
-        this.extraIntegerFields.put(key, Integer.valueOf(value));
-        this.extraIntegerFieldSwitches.put(key, true);
+    public Integer getExtraFieldAsInteger(String key) {
+        if (this.extraFieldSwitches.get(key).booleanValue()) {
+            return Integer.parseInt(this.extraFields.get(key));
+        }
+        throw new FieldNotEnableException();
+    }
+
+    public void setExtraField(String key, String value) {
+        this.extraFields.put(key, value);
+        this.extraFieldSwitches.put(key, true);
     }
 }

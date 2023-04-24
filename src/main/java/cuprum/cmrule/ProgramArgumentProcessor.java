@@ -9,14 +9,14 @@ public class ProgramArgumentProcessor {
     private boolean targetPatternSwitch = false;
     private boolean initialPatternSwitch = false;
     private boolean ruleSwitch = false;
-    private Map<String, String> extraIntegerFields = new LinkedHashMap<>();
+    private Map<String, String> extraFields = new LinkedHashMap<>();
     // <key, help_text>
 
     public ProgramArgument handleArgument(String[] args) {
         int expectedLength = (this.targetPatternSwitch ? 1 : 0)
                 + (this.initialPatternSwitch ? 1 : 0)
                 + (this.ruleSwitch ? 4 : 0)
-                + extraIntegerFields.size();
+                + extraFields.size();
         if (args.length == expectedLength) {
             return this.parseArguments(args);
         } else {
@@ -44,8 +44,8 @@ public class ProgramArgumentProcessor {
                     Integer.parseInt(args[index + 3]));
             index += 4;
         }
-        for (String key : this.extraIntegerFields.keySet()) {
-            struct.setExtraIntegerFields(key, Integer.parseInt(args[index]));
+        for (String key : this.extraFields.keySet()) {
+            struct.setExtraField(key, args[index]);
             index++;
         }
 
@@ -73,12 +73,11 @@ public class ProgramArgumentProcessor {
                     sc.nextInt());
             sc.nextLine();
         }
-        if (this.extraIntegerFields.size() > 0) {
-            for (Entry<String, String> entry : this.extraIntegerFields.entrySet()) {
+        if (this.extraFields.size() > 0) {
+            for (Entry<String, String> entry : this.extraFields.entrySet()) {
                 System.out.println(entry.getValue());
-                struct.setExtraIntegerFields(entry.getKey(), sc.nextInt());
+                struct.setExtraField(entry.getKey(), sc.nextLine());
             }
-            sc.nextLine();
         }
 
         sc.close();
@@ -100,8 +99,8 @@ public class ProgramArgumentProcessor {
         return this;
     }
 
-    public ProgramArgumentProcessor addExtraIntegerFields(String key, String hint) {
-        this.extraIntegerFields.put(key, hint);
+    public ProgramArgumentProcessor addExtraField(String key, String hint) {
+        this.extraFields.put(key, hint);
         return this;
     }
 }

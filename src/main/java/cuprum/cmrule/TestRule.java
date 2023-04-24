@@ -10,7 +10,7 @@ public class TestRule {
         ProgramArgumentProcessor argProcessor = new ProgramArgumentProcessor();
         ProgramArgument parsedArgs = argProcessor
                 .addInitialPattern().addRule()
-                .addExtraIntegerFields("step", "Enter iteration steps:")
+                .addExtraField("step", "Enter iteration steps:")
                 .handleArgument(args);
 
         int[] rulePattern = parsedArgs.getRulePattern();
@@ -22,6 +22,6 @@ public class TestRule {
         ECARuleTester.testOneRule(
                 rulePattern[0], rulePattern[1], rulePattern[2], rulePattern[3],
                 qInit, predicate,
-                parsedArgs.getExtraIntegerFields("step") > 0 ? parsedArgs.getExtraIntegerFields("step") : 150);
+                parsedArgs.getExtraFieldAsInteger("step") > 0 ? parsedArgs.getExtraFieldAsInteger("step").intValue() : 150);
     }
 }

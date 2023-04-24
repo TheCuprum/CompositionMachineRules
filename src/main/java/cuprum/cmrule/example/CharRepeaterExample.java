@@ -48,7 +48,8 @@ public class CharRepeaterExample extends ExampleGeneration {
         if (cls == Long.class)
             return Long.valueOf((((long)'a' & 0xFF) << 32) | (10 & 0xFFFFFFFF));
         else
-            throw new IllegalArgumentException("Only accept Long type");
+            // throw new IllegalArgumentException("Only accept Long type");
+            return null;
     }
 
     public static void main(String[] args) {

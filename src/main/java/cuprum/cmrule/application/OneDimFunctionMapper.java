@@ -1,7 +1,10 @@
 package cuprum.cmrule.application;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import compositionmachine.machine.Arrow;
 import compositionmachine.machine.ConnectedQuiver;
@@ -21,7 +24,7 @@ public class OneDimFunctionMapper {
         this.funcList = functionList;
     }
 
-    public static GeneralFunction[] mapFunctions(GeneralFunction[][] functionList, Quiver<ConnectedQuiver> quiver){
+    public static Set<GeneralFunction> mapFunctions(GeneralFunction[][] functionList, Quiver<ConnectedQuiver> quiver) {
         OneDimFunctionMapper mapper = new OneDimFunctionMapper(functionList);
         return mapper.mapFunctions(quiver);
     }
@@ -43,7 +46,21 @@ public class OneDimFunctionMapper {
         }
     }
 
-    public GeneralFunction[] mapFunctions(Quiver<ConnectedQuiver> quiver) {
+    private Set<GeneralFunction> combineFunctions(List<GeneralFunction> functionList) {
+        int listSize = functionList.size();
+        Set<GeneralFunction> funcSet = new HashSet<>((listSize * listSize + listSize) >> 2);
+        for (int index = 0; index < listSize; index++) {
+            GeneralFunction fn = functionList.get(index);
+            funcSet.add(fn);
+            for (int sliceIndex = index + 1; sliceIndex < listSize; sliceIndex++) {
+                fn = fn.andThen(functionList.get(sliceIndex));
+                funcSet.add(fn);
+            }
+        }
+        return funcSet;
+    }
+
+    public Set<GeneralFunction> mapFunctions(Quiver<ConnectedQuiver> quiver) {
         if (quiver.size() != this.funcList.size())
             throw new IllegalArgumentException("Quiver and function size mismatch.");
 
@@ -52,7 +69,7 @@ public class OneDimFunctionMapper {
                 throw new IllegalArgumentException("Quiver and function size mismatch.");
         }
 
-        ArrayList<GeneralFunction> retFunctions = new ArrayList<>();
+        Set<GeneralFunction> retFunctionSet = new HashSet<>();
         ArrayList<GeneralFunction> functionBuffer = new ArrayList<>();
         for (int i = 0; i < quiver.size(); i++) {
             ConnectedQuiver cq = quiver.get(i);
@@ -63,17 +80,14 @@ public class OneDimFunctionMapper {
                 int state = cq.getArrowState(arrIter.next());
                 if (state > 0) {
                     functionBuffer.add(functions[j]);
-                } else if (functionBuffer.size() > 0) {
+                } 
+                if ((state == 0 || j == len - 1 ) && functionBuffer.size() > 0) {
                     // combine functions
-                    GeneralFunction fn = functionBuffer.get(0);
-                    for (int index = 1; index < functionBuffer.size(); index++) {
-                        fn = fn.andThen(functionBuffer.get(index));
-                    }
+                    retFunctionSet.addAll(this.combineFunctions(functionBuffer));
                     functionBuffer.clear();
-                    retFunctions.add(fn);
                 }
             }
         }
-        return retFunctions.toArray(new GeneralFunction[0]);
+        return retFunctionSet;
     }
 }

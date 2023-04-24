@@ -2,6 +2,7 @@ package cuprum.cmrule.example;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Set;
 
 import compositionmachine.machine.CompositionMachine;
 import compositionmachine.machine.ConnectedQuiver;
@@ -112,8 +113,8 @@ public class StringFilterExampleDeprecated {
         //     System.out.println(machine.getQuiverHistory().get(index));
         // }
         if (quiver != null) {
-            GeneralFunction[] outFunctions = mapper.mapFunctions(quiver);
-            System.out.println("Output function count: " + outFunctions.length);
+            Set<GeneralFunction> outFunctions = mapper.mapFunctions(quiver);
+            System.out.println("Output function count: " + outFunctions.size());
             System.out.println("Test input: " + "[empty string]");
             for (GeneralFunction fn : outFunctions) {
                 System.out.println("Output: " + fn.apply(""));

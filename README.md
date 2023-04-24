@@ -1,5 +1,7 @@
 # CompositionMachineRules
 
+Code repository for research.
+
 ## Rule Map
 
 simplification (d2 & d3):

@@ -8,14 +8,14 @@ public class TestAllMatchOptimized {
     public static void main(String[] args) {
         ProgramArgumentProcessor argProcessor = new ProgramArgumentProcessor();
         ProgramArgument parsedArgs = argProcessor
-                .addExtraIntegerFields("pattern_length", "Pattern Length:")
-                .addExtraIntegerFields("thread_count", "Max threads to run tasks:")
-                .addExtraIntegerFields("io_threads", "Number of threads for file I/O (input 0 to disable):")
+                .addExtraField("pattern_length", "Pattern Length:")
+                .addExtraField("thread_count", "Max threads to run tasks:")
+                .addExtraField("io_threads", "Number of threads for file I/O (input 0 to disable):")
                 .handleArgument(args);
 
-        int patternLength = parsedArgs.getExtraIntegerFields("pattern_length");
-        int concurrentSize = parsedArgs.getExtraIntegerFields("thread_count");
-        int ioThreads = parsedArgs.getExtraIntegerFields("io_threads");
+        int patternLength = parsedArgs.getExtraFieldAsInteger("pattern_length");
+        int concurrentSize = parsedArgs.getExtraFieldAsInteger("thread_count");
+        int ioThreads = parsedArgs.getExtraFieldAsInteger("io_threads");
 
         OneDimensionalQuiverInitializer startQInit = new OneDimensionalQuiverInitializer("0".repeat(patternLength));
 
